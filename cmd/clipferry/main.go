@@ -50,6 +50,12 @@ var menuText = map[string]map[string]string{
 		"unpaired": "Eşleşmedi — cihaz eklemek için aç", "paused": "Senkron duraklatıldı", "syncing": "Senkron açık",
 		"syncing1": "%s ile senkron", "syncingN": "%d cihazla senkron", "offline": "Cihazlarınız aranıyor…",
 	},
+	"zh": {
+		"starting": "正在启动…", "open": "打开 Clipferry", "pair": "添加设备…", "pause": "暂停同步",
+		"login": "登录时启动", "quit": "退出 Clipferry", "update": "安装更新 %s",
+		"unpaired": "还没配对，打开 Clipferry 添加设备", "paused": "同步已暂停", "syncing": "同步中",
+		"syncing1": "正在与 %s 同步", "syncingN": "正在与 %d 台设备同步", "offline": "正在寻找你的设备…",
+	},
 }
 
 // instanceID keeps a copy started with its own CLIPFERRY_DATA_DIR (for
