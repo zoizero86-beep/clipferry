@@ -46,6 +46,12 @@ Prefer no installer? `Clipferry-amd64.exe` (or `-arm64.exe`) is a portable singl
 
 Clipferry lives in the menu bar (macOS) or system tray (Windows); closing its window keeps it running. To have it start with your computer, turn on **Start Clipferry when this computer starts** in the welcome card or in Settings. The same option is in the icon's menu as **Start at login**.
 
+## Updates and languages
+
+Clipferry checks for new versions a few times a day. With **Install updates automatically** on (the default, in Settings), it downloads the new version, checks it against the SHA-256 checksum published with the release, installs it and restarts by itself. You can also check and install by hand from **Settings → Updates**, or from **Install update** in the icon's menu when one is waiting. Builds from source (`go run`, development versions) never update themselves.
+
+The app is available in **English** and **Turkish**. It follows your system language, and you can choose another in **Settings → Language**. To add a language, translate `internal/ui/dist/i18n.js` and the tray menu texts in `cmd/clipferry/main.go`.
+
 ## Pair your computers
 
 Both computers must be on the same network (the same Wi-Fi, or Wi-Fi and Ethernet on the same router).
@@ -175,7 +181,8 @@ This starts two simulated devices ("MacBook Pro" and "Office PC") on a simulated
 | `internal/secrets` | Secret detection |
 | `internal/store` | Local SQLite history with full-text search |
 | `internal/sysclip` | Native clipboard access for macOS and Windows |
-| `internal/ui/dist` | The app window (plain HTML, CSS and JS, no build step) |
+| `internal/ui/dist` | The app window (plain HTML, CSS and JS, no build step) and its translations |
+| `internal/update` | Self-update from GitHub releases, verified against published checksums |
 
 ## Security notes
 
@@ -203,7 +210,7 @@ This starts two simulated devices ("MacBook Pro" and "Office PC") on a simulated
 ## Roadmap
 
 - Images and small files
-- Signed and notarized builds, automatic updates
+- Signed and notarized builds
 - Linux app
 - Ferry key rotation when a device is removed
 

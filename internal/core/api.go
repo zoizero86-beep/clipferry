@@ -38,6 +38,8 @@ func (e *Engine) Handler() http.Handler {
 			"devices":   devices,
 			"pairing":   e.Pairing(),
 			"autostart": e.Autostart(), // null when not controllable
+			"update":    e.Update(),    // null when updates are not available
+			"language":  e.Language(),
 			"count":     count,
 			"mcp_url":   "http://" + r.Host + "/mcp",
 		})
@@ -116,6 +118,24 @@ func (e *Engine) Handler() http.Handler {
 			return
 		}
 		writeJSON(w, http.StatusOK, map[string]bool{"enabled": body.Enabled})
+	})
+
+	api.HandleFunc("POST /api/update/check", func(w http.ResponseWriter, r *http.Request) {
+		st, err := e.CheckUpdate(r.Context())
+		if err != nil {
+			writeJSON(w, http.StatusBadGateway, map[string]any{"error": err.Error(), "update": st})
+			return
+		}
+		writeJSON(w, http.StatusOK, st)
+	})
+	api.HandleFunc("POST /api/update/install", func(w http.ResponseWriter, r *http.Request) {
+		// Runs in the background: on success the app restarts.
+		go func() {
+			if err := e.InstallUpdate(context.Background()); err != nil {
+				e.opts.Logf("update install: %v", err)
+			}
+		}()
+		w.WriteHeader(http.StatusAccepted)
 	})
 
 	api.HandleFunc("POST /api/pair/start", func(w http.ResponseWriter, r *http.Request) {

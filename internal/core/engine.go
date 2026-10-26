@@ -73,6 +73,8 @@ type Settings struct {
 	RelayURL         string `json:"relay_url"`
 	RelayToken       string `json:"relay_token"`
 	MCPShowSecrets   bool   `json:"mcp_show_secrets"`
+	Language         string `json:"language"`    // "auto", "en" or "tr"
+	AutoUpdate       bool   `json:"auto_update"` // install new versions automatically
 }
 
 // Options configures an Engine.
@@ -137,6 +139,7 @@ type Engine struct {
 	lan  *lanState // nil without Discovery
 
 	autostart Autostarter
+	updater   *updater
 }
 
 func hashText(s string) string {
@@ -245,6 +248,8 @@ func (e *Engine) loadSettings() error {
 		SecretTTLSeconds: 300,
 		ApplyRemote:      true,
 		HistoryLimit:     500,
+		Language:         "auto",
+		AutoUpdate:       true,
 	}
 	if raw, err := e.st.Setting("settings", ""); err != nil {
 		return err
@@ -287,6 +292,12 @@ func (e *Engine) UpdateSettings(s Settings) (Settings, error) {
 	}
 	if s.SecretTTLSeconds < 30 || s.SecretTTLSeconds > 86400 {
 		return Settings{}, errors.New("secret expiry must be between 30 seconds and 24 hours")
+	}
+	if s.Language == "" {
+		s.Language = "auto"
+	}
+	if s.Language != "auto" && !languages[s.Language] {
+		return Settings{}, errors.New("language must be auto, en or tr")
 	}
 	if s.HistoryLimit < 10 || s.HistoryLimit > 10000 {
 		return Settings{}, errors.New("history limit must be between 10 and 10000")
@@ -390,6 +401,7 @@ func (e *Engine) Run(ctx context.Context) {
 	e.mu.Unlock()
 	e.startLAN(ctx)
 	e.reconnect()
+	go e.updateLoop(ctx)
 
 	poll := time.NewTicker(e.opts.PollInterval)
 	janitor := time.NewTicker(5 * time.Second)

@@ -6,7 +6,9 @@ package main
 
 import (
 	"context"
+	"crypto/sha256"
 	_ "embed"
+	"encoding/hex"
 	"flag"
 	"fmt"
 	"log"
@@ -14,11 +16,13 @@ import (
 	"path/filepath"
 	"runtime"
 	"strconv"
+	"time"
 
 	"github.com/bkrdmrcioglu/clipferry/internal/core"
 	"github.com/bkrdmrcioglu/clipferry/internal/lan"
 	"github.com/bkrdmrcioglu/clipferry/internal/store"
 	"github.com/bkrdmrcioglu/clipferry/internal/sysclip"
+	"github.com/bkrdmrcioglu/clipferry/internal/update"
 	"github.com/wailsapp/wails/v3/pkg/application"
 	"github.com/wailsapp/wails/v3/pkg/events"
 )
@@ -28,6 +32,36 @@ var trayTemplateIcon []byte
 
 //go:embed icons/tray.png
 var trayIcon []byte
+
+//go:embed icons/app.png
+var appIcon []byte
+
+// Tray menu texts. The window has its own translations.
+var menuText = map[string]map[string]string{
+	"en": {
+		"starting": "Starting…", "open": "Open Clipferry", "pair": "Add a device…", "pause": "Pause syncing",
+		"login": "Start at login", "quit": "Quit Clipferry", "update": "Install update %s",
+		"unpaired": "Not paired — open to add a device", "paused": "Syncing paused", "syncing": "Syncing",
+		"syncing1": "Syncing with %s", "syncingN": "Syncing with %d devices", "offline": "Looking for your devices…",
+	},
+	"tr": {
+		"starting": "Başlatılıyor…", "open": "Clipferry'yi aç", "pair": "Cihaz ekle…", "pause": "Senkronu duraklat",
+		"login": "Girişte başlat", "quit": "Clipferry'den çık", "update": "Güncellemeyi yükle (%s)",
+		"unpaired": "Eşleşmedi — cihaz eklemek için aç", "paused": "Senkron duraklatıldı", "syncing": "Senkron açık",
+		"syncing1": "%s ile senkron", "syncingN": "%d cihazla senkron", "offline": "Cihazlarınız aranıyor…",
+	},
+}
+
+// instanceID keeps a copy started with its own CLIPFERRY_DATA_DIR (for
+// development and tests) from being treated as a second launch of the app.
+func instanceID() string {
+	id := "com.bkrdmrcioglu.clipferry"
+	if d := os.Getenv("CLIPFERRY_DATA_DIR"); d != "" {
+		h := sha256.Sum256([]byte(d))
+		id += "." + hex.EncodeToString(h[:4])
+	}
+	return id
+}
 
 func dataDir() string {
 	if d := os.Getenv("CLIPFERRY_DATA_DIR"); d != "" {
@@ -94,11 +128,12 @@ func main() {
 	app := application.New(application.Options{
 		Name:        "Clipferry",
 		Description: "Shared clipboard for your computers",
+		Icon:        appIcon, // window and taskbar icon on Windows
 		Mac: application.MacOptions{
 			ActivationPolicy: application.ActivationPolicyAccessory,
 		},
 		SingleInstance: &application.SingleInstanceOptions{
-			UniqueID: "com.bkrdmrcioglu.clipferry",
+			UniqueID: instanceID(),
 			OnSecondInstanceLaunch: func(application.SecondInstanceData) {
 				if window != nil {
 					window.Show()
@@ -159,13 +194,25 @@ func main() {
 	}
 	tray.SetTooltip("Clipferry")
 
+	eng.SetUpdater(&update.Client{API: os.Getenv("CLIPFERRY_UPDATE_API")}, app.Quit)
+	tr := func(key string) string { return menuText[eng.Language()][key] }
+
 	menu := app.NewMenu()
-	statusItem := menu.Add("Starting…").SetEnabled(false)
+	statusItem := menu.Add(tr("starting")).SetEnabled(false)
+	updateItem := menu.Add("").SetHidden(true)
+	updateItem.OnClick(func(*application.Context) {
+		go func() {
+			if err := eng.InstallUpdate(context.Background()); err != nil {
+				log.Printf("update: %v", err)
+				show("")
+			}
+		}()
+	})
 	menu.AddSeparator()
-	menu.Add("Open Clipferry").OnClick(func(*application.Context) { show("") })
-	menu.Add("Add a device…").OnClick(func(*application.Context) { show("?pair=1") })
+	openItem := menu.Add(tr("open")).OnClick(func(*application.Context) { show("") })
+	pairItem := menu.Add(tr("pair")).OnClick(func(*application.Context) { show("?pair=1") })
 	menu.AddSeparator()
-	pauseItem := menu.AddCheckbox("Pause syncing", eng.Settings().Paused)
+	pauseItem := menu.AddCheckbox(tr("pause"), eng.Settings().Paused)
 	pauseItem.OnClick(func(c *application.Context) {
 		s := eng.Settings()
 		s.Paused = c.ClickedMenuItem().Checked()
@@ -173,7 +220,7 @@ func main() {
 	})
 	eng.SetAutostart(app.Autostart)
 	loginEnabled, _ := app.Autostart.IsEnabled()
-	loginItem := menu.AddCheckbox("Start at login", loginEnabled)
+	loginItem := menu.AddCheckbox(tr("login"), loginEnabled)
 	loginItem.OnClick(func(c *application.Context) {
 		if err := eng.SetAutostartEnabled(c.ClickedMenuItem().Checked()); err != nil {
 			log.Printf("autostart: %v", err)
@@ -182,28 +229,45 @@ func main() {
 		}
 	})
 	menu.AddSeparator()
-	menu.Add("Quit Clipferry").OnClick(func(*application.Context) { app.Quit() })
+	quitItem := menu.Add(tr("quit")).OnClick(func(*application.Context) { app.Quit() })
 	tray.SetMenu(menu)
 
 	refresh := func() {
 		st := eng.Status()
 		set := eng.Settings()
-		label := "Not paired — open to add a device"
+		label := tr("unpaired")
 		switch {
 		case st.Paired && set.Paused:
-			label = "Syncing paused"
+			label = tr("paused")
 		case st.Paired && st.Connected:
-			label = "Syncing"
-			if ds, err := eng.Store().Devices(); err == nil && len(ds) > 1 {
-				label = fmt.Sprintf("Syncing with %d other device", len(ds)-1)
-				if len(ds) > 2 {
-					label += "s"
+			label = tr("syncing")
+			var online []string
+			if ds, err := eng.Store().Devices(); err == nil {
+				for _, d := range ds {
+					if !d.Self && time.Since(d.LastSeen) < 150*time.Second {
+						online = append(online, d.Name)
+					}
 				}
 			}
+			if len(online) == 1 {
+				label = fmt.Sprintf(tr("syncing1"), online[0])
+			} else if len(online) > 1 {
+				label = fmt.Sprintf(tr("syncingN"), len(online))
+			}
 		case st.Paired:
-			label = "Offline — will sync when back"
+			label = tr("offline")
 		}
 		statusItem.SetLabel(label)
+		openItem.SetLabel(tr("open"))
+		pairItem.SetLabel(tr("pair"))
+		pauseItem.SetLabel(tr("pause"))
+		loginItem.SetLabel(tr("login"))
+		quitItem.SetLabel(tr("quit"))
+		if u := eng.Update(); u != nil && u.Available {
+			updateItem.SetLabel(fmt.Sprintf(tr("update"), u.Latest)).SetHidden(false)
+		} else {
+			updateItem.SetHidden(true)
+		}
 		pauseItem.SetChecked(set.Paused)
 		if on := eng.Autostart(); on != nil {
 			loginItem.SetChecked(*on)
@@ -219,7 +283,7 @@ func main() {
 				return
 			case ev := <-events:
 				switch ev.Type {
-				case "status", "devices", "settings", "pair.done", "autostart":
+				case "status", "devices", "settings", "pair.done", "autostart", "update":
 					application.InvokeAsync(refresh)
 				}
 			}

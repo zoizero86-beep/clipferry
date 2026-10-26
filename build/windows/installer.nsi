@@ -42,6 +42,9 @@ Section "Install"
   WriteRegStr HKCU "${UNINST_KEY}" "UninstallString" '"$INSTDIR\Uninstall.exe"'
   WriteRegDWORD HKCU "${UNINST_KEY}" "NoModify" 1
   WriteRegDWORD HKCU "${UNINST_KEY}" "NoRepair" 1
+  ; Automatic updates run this installer silently: start the new version.
+  IfSilent 0 +2
+    Exec '"$INSTDIR\Clipferry.exe"'
 SectionEnd
 
 Section "Uninstall"

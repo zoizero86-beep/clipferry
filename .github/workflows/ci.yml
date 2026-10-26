@@ -76,6 +76,8 @@ jobs:
         with:
           path: dist
           merge-multiple: true
+      - name: Checksums for the in-app updater
+        run: cd dist && sha256sum * > SHA256SUMS && cat SHA256SUMS
       - name: Publish GitHub release
         env:
           GH_TOKEN: ${{ github.token }}

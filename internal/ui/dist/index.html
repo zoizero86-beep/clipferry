@@ -360,6 +360,15 @@
   .relay-fields { display: grid; gap: 6px; margin-top: 6px; }
   details summary { cursor: pointer; color: var(--text-2); font-weight: 600; font-size: 13px; padding: 10px 0; }
   .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .update-box { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; padding: 10px 12px; border: 1px solid var(--border); border-radius: 10px; }
+  .update-status { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-2); min-width: 0; }
+  .update-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--success); flex: none; }
+  .update-dot.available { background: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+  .update-dot.busy { background: var(--warn); }
+  .update-dot.error { background: var(--danger); }
+  .update-actions { display: flex; gap: 6px; }
+  .update-notes { white-space: pre-wrap; max-height: 160px; overflow: auto; font-size: 12px; }
 
   .snippet-label { font-size: 12.5px; color: var(--muted); margin: 0 0 8px; }
   .code-wrap { position: relative; }
@@ -404,7 +413,7 @@
     .code { font-size: 26px; gap: 6px; }
     .code span { padding: 10px 8px; }
     .segmented, .segmented.two { grid-template-columns: 1fr; }
-    .grid-2 { grid-template-columns: 1fr; }
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
     .dlg-head, .dlg-body { padding-left: 16px; padding-right: 16px; }
     .dlg-foot { padding: 12px 16px 16px; }
     .dlg-foot .btn { flex: 1; }
@@ -445,16 +454,16 @@
 <header>
   <div class="brand"><svg class="brand-mark"><use href="#i-brand"/></svg><span class="word">Clipferry</span></div>
   <div class="spacer"></div>
-  <button class="status-pill" id="statusPill" hidden title="Devices"><span class="status-dot"></span><span id="statusText"></span></button>
-  <button class="icon-btn" id="mcpBtn" hidden title="Connect an AI tool" aria-label="Connect an AI tool"><svg><use href="#i-plug"/></svg></button>
-  <button class="icon-btn" id="settingsBtn" hidden title="Settings" aria-label="Settings"><svg><use href="#i-gear"/></svg></button>
+  <button class="status-pill" id="statusPill" hidden data-i18n-title="devices"><span class="status-dot"></span><span id="statusText"></span></button>
+  <button class="icon-btn" id="mcpBtn" hidden data-i18n-title="connectAi"><svg><use href="#i-plug"/></svg></button>
+  <button class="icon-btn" id="settingsBtn" hidden data-i18n-title="settings"><svg><use href="#i-gear"/></svg></button>
 </header>
 
 <section class="locked" id="lockedView" hidden>
   <div class="card">
     <svg class="brand-mark"><use href="#i-brand"/></svg>
-    <h1>Open Clipferry from its icon</h1>
-    <p>This window is part of the Clipferry app. Click the Clipferry icon in the menu bar (Mac) or the system tray (Windows) and choose <strong>Open Clipferry</strong>.</p>
+    <h1 data-i18n="locked.title">Open Clipferry from its icon</h1>
+    <p data-i18n-html="locked.text"></p>
   </div>
 </section>
 
@@ -463,15 +472,15 @@
     <section class="onboard" id="onboard" hidden>
       <svg class="onboard-art"><use href="#i-ferry"/></svg>
       <div>
-        <h2>Connect your other computer</h2>
-        <p>Install Clipferry on a computer on the same Wi-Fi, then pair the two with a one-time code. No account, no server — clips go directly and encrypted.</p>
+        <h2 data-i18n="onboard.title">Connect your other computer</h2>
+        <p data-i18n="onboard.text"></p>
         <div class="actions">
-          <button class="btn btn-primary" id="onboardShow"><svg><use href="#i-hash"/></svg>Show a code</button>
-          <button class="btn" id="onboardEnter"><svg><use href="#i-keyboard"/></svg>Enter a code</button>
+          <button class="btn btn-primary" id="onboardShow"><svg><use href="#i-hash"/></svg><span data-i18n="showCode">Show a code</span></button>
+          <button class="btn" id="onboardEnter"><svg><use href="#i-keyboard"/></svg><span data-i18n="enterCode">Enter a code</span></button>
         </div>
         <label class="onboard-login" id="onboardLogin" hidden>
           <span class="switch"><input type="checkbox" id="onboardAutostart"><span></span></span>
-          <span>Start Clipferry when this computer starts</span>
+          <span data-i18n="autostart">Start Clipferry when this computer starts</span>
         </label>
       </div>
     </section>
@@ -479,16 +488,16 @@
     <div class="toolbar">
       <div class="search-wrap">
         <svg><use href="#i-search"/></svg>
-        <input class="field" id="searchInput" type="search" placeholder="Search everything you copied…" aria-label="Search clips" autocomplete="off">
+        <input class="field" id="searchInput" type="search" data-i18n-ph="search.placeholder" data-i18n-aria="search.label" autocomplete="off">
         <kbd>/</kbd>
       </div>
     </div>
-    <div class="chips" id="chips" role="toolbar" aria-label="Filter"></div>
+    <div class="chips" id="chips" role="toolbar" data-i18n-aria="filter"></div>
     <div class="result-info" id="resultInfo" hidden></div>
     <div id="clipArea"></div>
     <div class="footer-bar" id="footerBar" hidden>
       <span id="footerCount"></span>
-      <button class="link-btn" id="clearBtn">Clear unpinned history</button>
+      <button class="link-btn" id="clearBtn" data-i18n="clearHistory">Clear unpinned history</button>
     </div>
   </div>
 </main>
@@ -496,144 +505,159 @@
 <!-- Pairing -->
 <dialog id="pairDialog" aria-labelledby="pairTitle">
   <div class="dlg-head">
-    <div><h2 id="pairTitle">Add a device</h2><p id="pairSub">Pair another computer with a one-time code.</p></div>
+    <div><h2 id="pairTitle" data-i18n="pair.title">Add a device</h2><p id="pairSub" data-i18n="pair.sub"></p></div>
     <div class="spacer"></div>
-    <button class="icon-btn" data-close aria-label="Close"><svg><use href="#i-x"/></svg></button>
+    <button class="icon-btn" data-close data-i18n-title="close"><svg><use href="#i-x"/></svg></button>
   </div>
   <div class="dlg-body">
     <div id="pairChoose" class="choice">
-      <button id="choiceShow"><span class="ico"><svg><use href="#i-hash"/></svg></span><span><strong>Show a code on this computer</strong><span class="sub">Then type it on the other one.</span></span></button>
-      <button id="choiceEnter"><span class="ico"><svg><use href="#i-keyboard"/></svg></span><span><strong>Enter a code from the other computer</strong><span class="sub">It is showing a 9-digit code.</span></span></button>
+      <button id="choiceShow"><span class="ico"><svg><use href="#i-hash"/></svg></span><span><strong data-i18n="pair.choiceShow"></strong><span class="sub" data-i18n="pair.choiceShowSub"></span></span></button>
+      <button id="choiceEnter"><span class="ico"><svg><use href="#i-keyboard"/></svg></span><span><strong data-i18n="pair.choiceEnter"></strong><span class="sub" data-i18n="pair.choiceEnterSub"></span></span></button>
     </div>
     <div id="pairShow" hidden>
-      <p class="snippet-label" style="text-align:center">On the other computer, open Clipferry → <strong>Enter a code</strong> and type:</p>
+      <p class="snippet-label" style="text-align:center" data-i18n-html="pair.showHint"></p>
       <div class="code" id="pairCode" aria-live="polite"></div>
       <div class="countdown" id="pairCountdown"></div>
-      <div class="waiting"><span class="spinner"></span>Waiting for the other device…</div>
+      <div class="waiting"><span class="spinner"></span><span data-i18n="pair.waiting"></span></div>
     </div>
     <form id="pairEnter" hidden>
-      <label class="snippet-label" for="codeInput">Type the code shown on the other computer:</label>
-      <input class="field code-input" id="codeInput" inputmode="numeric" autocomplete="one-time-code" placeholder="123-456-789" maxlength="11" aria-label="Pairing code">
-      <div class="waiting" id="joinWaiting" hidden><span class="spinner"></span>Finding the other computer and connecting securely…</div>
+      <label class="snippet-label" for="codeInput" data-i18n="pair.enterLabel"></label>
+      <input class="field code-input" id="codeInput" inputmode="numeric" autocomplete="one-time-code" placeholder="123-456-789" maxlength="11" data-i18n-aria="pair.codeLabel">
+      <div class="waiting" id="joinWaiting" hidden><span class="spinner"></span><span data-i18n="pair.joining"></span></div>
     </form>
     <div id="pairDone" class="pair-done" hidden>
       <div class="big-check"><svg><use href="#i-check"/></svg></div>
-      <h3 id="pairDoneTitle">Paired</h3>
-      <p>Copy something on either computer — it shows up on the other.</p>
+      <h3 id="pairDoneTitle"></h3>
+      <p data-i18n="pair.doneText"></p>
     </div>
     <div class="form-error" id="pairError" hidden><svg><use href="#i-alert"/></svg><span></span></div>
   </div>
   <div class="dlg-foot">
-    <button class="btn" data-close id="pairCancel">Cancel</button>
-    <button class="btn btn-primary" id="pairSubmit" hidden>Pair</button>
+    <button class="btn" data-close id="pairCancel" data-i18n="cancel">Cancel</button>
+    <button class="btn btn-primary" id="pairSubmit" hidden data-i18n="pair.submit">Pair</button>
   </div>
 </dialog>
 
 <!-- Devices -->
 <dialog id="devicesDialog" aria-labelledby="devicesTitle">
   <div class="dlg-head">
-    <div><h2 id="devicesTitle">Devices</h2><p id="devicesSub"></p></div>
+    <div><h2 id="devicesTitle" data-i18n="devices">Devices</h2><p id="devicesSub"></p></div>
     <div class="spacer"></div>
-    <button class="icon-btn" data-close aria-label="Close"><svg><use href="#i-x"/></svg></button>
+    <button class="icon-btn" data-close data-i18n-title="close"><svg><use href="#i-x"/></svg></button>
   </div>
   <div class="dlg-body"><ul class="devices" id="deviceList"></ul><p class="note" id="relayNote"></p></div>
   <div class="dlg-foot">
-    <button class="btn btn-ghost left" id="leaveBtn" style="color:var(--danger)">Leave this ferry</button>
-    <button class="btn btn-primary" id="addDeviceBtn"><svg><use href="#i-link"/></svg>Add a device</button>
+    <button class="btn btn-ghost left" id="leaveBtn" style="color:var(--danger)" data-i18n="dev.leave">Leave this ferry</button>
+    <button class="btn btn-primary" id="addDeviceBtn"><svg><use href="#i-link"/></svg><span data-i18n="dev.add">Add a device</span></button>
   </div>
 </dialog>
 
 <!-- Settings -->
 <dialog id="settingsDialog" aria-labelledby="settingsTitle">
   <div class="dlg-head">
-    <div><h2 id="settingsTitle">Settings</h2><p id="versionText"></p></div>
+    <div><h2 id="settingsTitle" data-i18n="settings">Settings</h2><p id="versionText"></p></div>
     <div class="spacer"></div>
-    <button class="icon-btn" data-close aria-label="Close"><svg><use href="#i-x"/></svg></button>
+    <button class="icon-btn" data-close data-i18n-title="close"><svg><use href="#i-x"/></svg></button>
   </div>
   <form class="dlg-body" id="settingsForm">
     <div class="setting">
-      <label for="sName">This device's name</label>
+      <label for="sName" data-i18n="set.name">This device's name</label>
       <input class="field" id="sName" maxlength="64" required>
     </div>
     <div class="setting">
-      <span class="label">Passwords, keys and codes</span>
-      <p class="help">Clipferry recognises API keys, tokens, private keys, passwords and one-time codes before anything leaves this device.</p>
-      <div class="segmented" role="radiogroup" aria-label="Secret handling">
-        <label><input type="radio" name="secretMode" value="expire"><strong>Sync briefly</strong>Masked, deleted everywhere after a few minutes</label>
-        <label><input type="radio" name="secretMode" value="skip"><strong>Keep local</strong>Never leaves this device</label>
-        <label><input type="radio" name="secretMode" value="sync"><strong>Sync normally</strong>Masked, but kept in history</label>
+      <span class="label" data-i18n="set.secrets"></span>
+      <p class="help" data-i18n="set.secretsHelp"></p>
+      <div class="segmented" role="radiogroup" data-i18n-aria="set.secretHandling">
+        <label><input type="radio" name="secretMode" value="expire"><strong data-i18n="set.expire"></strong><span data-i18n="set.expireSub"></span></label>
+        <label><input type="radio" name="secretMode" value="skip"><strong data-i18n="set.skip"></strong><span data-i18n="set.skipSub"></span></label>
+        <label><input type="radio" name="secretMode" value="sync"><strong data-i18n="set.sync"></strong><span data-i18n="set.syncSub"></span></label>
       </div>
       <div class="row" id="ttlRow">
-        <label for="sTTL" class="help" style="margin:0">Delete secrets after</label>
+        <label for="sTTL" class="help" style="margin:0" data-i18n="set.ttl"></label>
         <select class="field" id="sTTL" style="width:auto">
-          <option value="60">1 minute</option><option value="120">2 minutes</option><option value="300">5 minutes</option>
-          <option value="900">15 minutes</option><option value="3600">1 hour</option>
+          <option value="60" data-i18n="set.ttl60"></option><option value="120" data-i18n="set.ttl120"></option><option value="300" data-i18n="set.ttl300"></option>
+          <option value="900" data-i18n="set.ttl900"></option><option value="3600" data-i18n="set.ttl3600"></option>
         </select>
       </div>
     </div>
     <div class="setting">
-      <div class="row"><label for="sApply">Paste clips from other devices automatically</label><span class="switch"><input type="checkbox" id="sApply"><span></span></span></div>
-      <p class="help">When off, clips from other devices only land in history.</p>
+      <div class="row"><label for="sApply" data-i18n="set.apply"></label><span class="switch"><input type="checkbox" id="sApply"><span></span></span></div>
+      <p class="help" data-i18n="set.applyHelp"></p>
     </div>
     <div class="setting" id="autostartSetting" hidden>
-      <div class="row"><label for="sAutostart">Start Clipferry when this computer starts</label><span class="switch"><input type="checkbox" id="sAutostart"><span></span></span></div>
-      <p class="help">Keeps your clipboard in sync without having to open the app. Changes apply immediately.</p>
+      <div class="row"><label for="sAutostart" data-i18n="autostart"></label><span class="switch"><input type="checkbox" id="sAutostart"><span></span></span></div>
+      <p class="help" data-i18n="set.autostartHelp"></p>
     </div>
     <div class="setting">
-      <div class="row"><label for="sPaused">Pause syncing</label><span class="switch"><input type="checkbox" id="sPaused"><span></span></span></div>
+      <div class="row"><label for="sPaused" data-i18n="set.pause"></label><span class="switch"><input type="checkbox" id="sPaused"><span></span></span></div>
     </div>
     <div class="setting">
-      <div class="row"><label for="sMcpSecrets">Let AI tools read secrets</label><span class="switch"><input type="checkbox" id="sMcpSecrets"><span></span></span></div>
-      <p class="help">Off by default: AI tools see that a secret was copied, not what it is.</p>
+      <div class="row"><label for="sMcpSecrets" data-i18n="set.mcpSecrets"></label><span class="switch"><input type="checkbox" id="sMcpSecrets"><span></span></span></div>
+      <p class="help" data-i18n="set.mcpSecretsHelp"></p>
     </div>
     <div class="setting">
-      <div class="grid-2">
-        <div><label for="sTheme" class="label">Appearance</label>
-          <select class="field" id="sTheme" style="margin-top:6px"><option value="system">System</option><option value="light">Light</option><option value="dark">Dark</option></select></div>
-        <div><label for="sLimit" class="label">Keep history</label>
-          <select class="field" id="sLimit" style="margin-top:6px"><option value="100">100 clips</option><option value="500">500 clips</option><option value="2000">2,000 clips</option><option value="10000">10,000 clips</option></select></div>
+      <div class="grid-3">
+        <div><label for="sLang" class="label" data-i18n="set.language"></label>
+          <select class="field" id="sLang" style="margin-top:6px"><option value="auto" data-i18n="set.langAuto"></option><option value="en">English</option><option value="tr">Türkçe</option></select></div>
+        <div><label for="sTheme" class="label" data-i18n="set.appearance"></label>
+          <select class="field" id="sTheme" style="margin-top:6px"><option value="system" data-i18n="set.themeSystem"></option><option value="light" data-i18n="set.themeLight"></option><option value="dark" data-i18n="set.themeDark"></option></select></div>
+        <div><label for="sLimit" class="label" data-i18n="set.history"></label>
+          <select class="field" id="sLimit" style="margin-top:6px"><option value="100"></option><option value="500"></option><option value="2000"></option><option value="10000"></option></select></div>
       </div>
     </div>
     <div class="setting">
-      <span class="label">Connection</span>
-      <div class="segmented two" role="radiogroup" aria-label="Connection">
-        <label><input type="radio" name="conn" value="lan"><strong>Same Wi-Fi</strong>Direct, no server. Devices must share a network.</label>
-        <label><input type="radio" name="conn" value="relay"><strong>Relay server</strong>Works across networks, through a relay you run.</label>
+      <span class="label" data-i18n="set.connection"></span>
+      <div class="segmented two" role="radiogroup" data-i18n-aria="set.connection">
+        <label><input type="radio" name="conn" value="lan"><strong data-i18n="set.lan"></strong><span data-i18n="set.lanSub"></span></label>
+        <label><input type="radio" name="conn" value="relay"><strong data-i18n="set.relay"></strong><span data-i18n="set.relaySub"></span></label>
       </div>
       <div id="relayFields" class="relay-fields">
-        <p class="help">The relay only forwards encrypted data and cannot read your clips. Use the same settings on every device.</p>
-        <label for="sRelay" class="help">Relay URL</label>
+        <p class="help" data-i18n="set.relayHelp"></p>
+        <label for="sRelay" class="help" data-i18n="set.relayUrl"></label>
         <input class="field" id="sRelay" placeholder="wss://relay.example.com" spellcheck="false">
-        <label for="sRelayToken" class="help">Relay token (only for private relays)</label>
+        <label for="sRelayToken" class="help" data-i18n="set.relayToken"></label>
         <input class="field" id="sRelayToken" type="password" autocomplete="off" spellcheck="false">
       </div>
+    </div>
+    <div class="setting" id="updateSetting" hidden>
+      <span class="label" data-i18n="set.updates"></span>
+      <div class="update-box">
+        <div class="update-status"><span class="update-dot" id="updateDot"></span><span id="updateText"></span></div>
+        <div class="update-actions">
+          <button type="button" class="btn" id="updateCheck" data-i18n="upd.check"></button>
+          <button type="button" class="btn btn-primary" id="updateInstall" hidden data-i18n="upd.install"></button>
+        </div>
+      </div>
+      <details id="updateNotesWrap" hidden><summary data-i18n="upd.notes"></summary><pre class="update-notes" id="updateNotes"></pre></details>
+      <div class="row"><label for="sAutoUpdate" data-i18n="set.autoUpdate"></label><span class="switch"><input type="checkbox" id="sAutoUpdate"><span></span></span></div>
+      <p class="help" data-i18n="set.autoUpdateHelp"></p>
     </div>
     <div class="form-error" id="settingsError" hidden><svg><use href="#i-alert"/></svg><span></span></div>
   </form>
   <div class="dlg-foot">
-    <button class="btn" data-close>Cancel</button>
-    <button class="btn btn-primary" id="settingsSave">Save</button>
+    <button class="btn" data-close data-i18n="cancel">Cancel</button>
+    <button class="btn btn-primary" id="settingsSave" data-i18n="save">Save</button>
   </div>
 </dialog>
 
 <!-- MCP -->
 <dialog id="mcpDialog" aria-labelledby="mcpTitle">
   <div class="dlg-head">
-    <div><h2 id="mcpTitle">Connect an AI tool</h2><p>Let Cursor, VS Code or any MCP client read what you copied on any of your computers.</p></div>
+    <div><h2 id="mcpTitle" data-i18n="connectAi">Connect an AI tool</h2><p data-i18n="mcp.sub"></p></div>
     <div class="spacer"></div>
-    <button class="icon-btn" data-close aria-label="Close"><svg><use href="#i-x"/></svg></button>
+    <button class="icon-btn" data-close data-i18n-title="close"><svg><use href="#i-x"/></svg></button>
   </div>
   <div class="dlg-body">
     <div class="tabs" role="tablist">
       <button role="tab" aria-selected="true" data-tab="cursor">Cursor</button>
       <button role="tab" aria-selected="false" data-tab="vscode">VS Code</button>
-      <button role="tab" aria-selected="false" data-tab="other">Other</button>
+      <button role="tab" aria-selected="false" data-tab="other" data-i18n="mcp.other">Other</button>
     </div>
     <p class="snippet-label" id="snippetLabel"></p>
-    <div class="code-wrap"><pre id="snippet"></pre><button class="btn copy-btn" id="copySnippet"><svg><use href="#i-copy"/></svg>Copy</button></div>
-    <p class="note">Then ask: <em>“Use what I just copied on my other computer.”</em> The snippet contains this device's private access token, so keep it to yourself. Secrets stay withheld unless you allow it in Settings.</p>
+    <div class="code-wrap"><pre id="snippet"></pre><button class="btn copy-btn" id="copySnippet"><svg><use href="#i-copy"/></svg><span data-i18n="copy">Copy</span></button></div>
+    <p class="note" data-i18n-html="mcp.note"></p>
   </div>
-  <div class="dlg-foot"><button class="btn" data-close>Done</button></div>
+  <div class="dlg-foot"><button class="btn" data-close data-i18n="done">Done</button></div>
 </dialog>
 
 <dialog id="confirmDialog" aria-labelledby="confirmTitle">
@@ -642,13 +666,14 @@
     <div><h2 id="confirmTitle"></h2><p id="confirmText"></p></div>
   </div>
   <div class="dlg-foot">
-    <button class="btn" id="confirmCancel">Cancel</button>
-    <button class="btn btn-danger" id="confirmOk">Delete</button>
+    <button class="btn" id="confirmCancel" data-i18n="cancel">Cancel</button>
+    <button class="btn btn-danger" id="confirmOk" data-i18n="delete">Delete</button>
   </div>
 </dialog>
 
 <div class="toast" id="toast" role="status" hidden><svg><use href="#i-check"/></svg><span></span></div>
 
+<script src="i18n.js"></script>
 <script>
 (() => {
   const $ = (id) => document.getElementById(id);
@@ -675,6 +700,43 @@
   let query = "";
   let searchTimer, loadSeq = 0;
   const expanded = new Set(), revealed = new Set();
+
+  /* ---------- language ---------- */
+  const I18N = window.CLIPFERRY_I18N || { en: {} };
+  let lang = (navigator.language || "en").slice(0, 2).toLowerCase();
+  if (!I18N[lang]) lang = "en";
+  // t("key", {name: "x"}) → translated text with {name} filled in.
+  function t(key, vars) {
+    let s = (I18N[lang] && I18N[lang][key]) ?? I18N.en[key] ?? key;
+    if (vars) for (const [k, v] of Object.entries(vars)) s = s.split(`{${k}}`).join(String(v));
+    return s;
+  }
+  const tn = (key, n, vars) => t(n === 1 && I18N.en[key + "1"] ? key + "1" : key, { n, ...vars });
+  function applyI18n() {
+    document.documentElement.lang = lang;
+    for (const n of document.querySelectorAll("[data-i18n]")) n.textContent = t(n.dataset.i18n);
+    for (const n of document.querySelectorAll("[data-i18n-html]")) n.innerHTML = t(n.dataset.i18nHtml); // trusted, static strings
+    for (const n of document.querySelectorAll("[data-i18n-ph]")) n.placeholder = t(n.dataset.i18nPh);
+    for (const n of document.querySelectorAll("[data-i18n-aria]")) n.setAttribute("aria-label", t(n.dataset.i18nAria));
+    for (const n of document.querySelectorAll("[data-i18n-title]")) { n.title = t(n.dataset.i18nTitle); n.setAttribute("aria-label", n.title); }
+    for (const o of $("sLimit").options) o.textContent = t("set.clips", { n: (+o.value).toLocaleString(lang) });
+  }
+  function setLang(l) {
+    if (l === lang || !I18N[l]) return;
+    lang = l;
+    applyI18n();
+  }
+  // Server messages that reach the UI in English.
+  function trErr(msg) {
+    const m = String(msg || "");
+    if (/did not match/i.test(m)) return t("err.wrongCode");
+    if (/different code/i.test(m)) return t("err.otherCode");
+    if (/couldn't find the other computer|no device is showing/i.test(m)) return t("err.notFound");
+    if (/timed out/i.test(m)) return t("err.timeout");
+    if (/nine digits/i.test(m)) return t("err.codeFormat");
+    return m;
+  }
+  applyI18n();
 
   /* ---------- theme ---------- */
   function applyTheme(t) {
@@ -730,29 +792,24 @@
     return DEVICE_COLORS[h % DEVICE_COLORS.length];
   }
   const platformIcon = (p) => (p === "macos" ? "i-laptop" : "i-monitor");
-  const platformName = (p) => ({ macos: "macOS", windows: "Windows", linux: "Linux" })[p] || p || "";
+  const platformName = (p) => (p ? t("platform." + p) : "");
 
   function relTime(iso) {
     const s = (Date.now() - new Date(iso).getTime()) / 1000;
-    if (s < 30) return "just now";
-    if (s < 3600) return `${Math.max(1, Math.round(s / 60))}m ago`;
-    if (s < 86400) return `${Math.round(s / 3600)}h ago`;
+    if (s < 30) return t("time.now");
+    if (s < 3600) return t("time.min", { n: Math.max(1, Math.round(s / 60)) });
+    if (s < 86400) return t("time.hour", { n: Math.round(s / 3600) });
     const d = new Date(iso);
     const days = Math.floor(s / 86400);
-    if (days < 7) return d.toLocaleDateString(undefined, { weekday: "short" }) + " " + d.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });
-    return d.toLocaleDateString(undefined, { day: "numeric", month: "short", year: d.getFullYear() === new Date().getFullYear() ? undefined : "numeric" });
+    if (days < 7) return d.toLocaleDateString(lang, { weekday: "short" }) + " " + d.toLocaleTimeString(lang, { hour: "2-digit", minute: "2-digit" });
+    return d.toLocaleDateString(lang, { day: "numeric", month: "short", year: d.getFullYear() === new Date().getFullYear() ? undefined : "numeric" });
   }
   function untilText(iso) {
     const s = Math.max(0, Math.round((new Date(iso).getTime() - Date.now()) / 1000));
     if (s >= 3600) return `${Math.round(s / 3600)}h`;
     return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
   }
-  const secretLabel = (k) => ({
-    "private-key": "Private key", "aws-access-key": "AWS key", "github-token": "GitHub token", "gitlab-token": "GitLab token",
-    "ai-api-key": "API key", "openai-key": "API key", "stripe-key": "Stripe key", "slack-token": "Slack token",
-    "google-api-key": "Google API key", "npm-token": "npm token", jwt: "Token", "connection-string": "Connection string",
-    assignment: "Password", "password-manager": "Password", "one-time-code": "One-time code", "card-number": "Card number", password: "Password",
-  })[k] || "Secret";
+  const secretLabel = (k) => (I18N.en["secret." + k] ? t("secret." + k) : t("secret.other"));
 
   function looksLikeCode(s) {
     return /[{};=<>$]|^\s*(\$|#!|import |const |let |def |func |SELECT |sudo |npm |git |docker |cd )/m.test(s) || /\n\s{2,}\S/.test(s) || /^[\w./~-]+$/.test(s.trim());
@@ -785,15 +842,15 @@
     const st = state.status, set = state.settings;
     const peers = state.devices.filter((d) => !d.self);
     const online = onlinePeers();
-    let s = "offline", t = "";
-    if (!st.paired) { s = "none"; t = "Not paired"; }
-    else if (set.paused) { s = "paused"; t = "Paused"; }
-    else if (st.connected && online.length) { s = "online"; t = online.length === 1 ? `Synced with ${online[0].name}` : `Synced with ${online.length} devices`; }
-    else if (st.mode === "lan") { t = peers.length === 1 ? `Looking for ${peers[0].name}…` : "Looking for your devices…"; }
-    else { t = st.connected ? (peers.length === 1 ? `Waiting for ${peers[0].name}…` : "Waiting for your devices…") : "Reconnecting…"; }
+    let s = "offline", text = "";
+    if (!st.paired) { s = "none"; text = t("status.notPaired"); }
+    else if (set.paused) { s = "paused"; text = t("status.paused"); }
+    else if (st.connected && online.length) { s = "online"; text = online.length === 1 ? t("status.synced1", { name: online[0].name }) : t("status.syncedN", { n: online.length }); }
+    else if (st.mode === "lan") { text = peers.length === 1 ? t("status.looking1", { name: peers[0].name }) : t("status.lookingN"); }
+    else { text = st.connected ? (peers.length === 1 ? t("status.waiting1", { name: peers[0].name }) : t("status.waitingN")) : t("status.reconnecting"); }
     pill.dataset.state = s;
-    $("statusText").textContent = t;
-    pill.title = st.error || "Devices";
+    $("statusText").textContent = text;
+    pill.title = st.error || t("devices");
     $("onboard").hidden = st.paired && peers.length > 0;
     const auto = state.autostart;
     $("onboardLogin").hidden = auto === null || auto === undefined;
@@ -809,11 +866,11 @@
     const wrap = $("chips");
     wrap.replaceChildren();
     const chip = (label, active, onclick, lead) => el("button", { class: "chip", ariaPressed: String(active), onclick }, lead, label);
-    wrap.append(chip("All", filter.kind === "all", () => setFilter("all")));
-    wrap.append(chip("Pinned", filter.kind === "pinned", () => setFilter("pinned"), icon("i-pin")));
+    wrap.append(chip(t("chip.all"), filter.kind === "all", () => setFilter("all")));
+    wrap.append(chip(t("chip.pinned"), filter.kind === "pinned", () => setFilter("pinned"), icon("i-pin")));
     if (state.devices.length > 1) {
       for (const d of state.devices) {
-        wrap.append(chip(d.self ? `${d.name} (this)` : d.name, filter.kind === "device" && filter.device === d.id,
+        wrap.append(chip(d.self ? t("thisDevice", { name: d.name }) : d.name, filter.kind === "device" && filter.device === d.id,
           () => setFilter("device", d.id), el("span", { class: "dot", style: `background:${devColor(d.id)}` })));
       }
     }
@@ -826,22 +883,22 @@
     const isShort = !masked && content.split("\n").length <= 4 && content.length < 360;
     const pre = el("pre", {
       class: "content" + (masked ? " masked" : "") + (!masked && !looksLikeCode(c.content) ? " prose" : "") + (isShort ? " short" : ""),
-      title: masked ? "" : "Click to copy",
+      title: masked ? "" : t("clip.clickToCopy"),
     });
     if (masked) pre.textContent = content; else pre.append(highlight(content, query));
     if (!masked) pre.onclick = () => { if (!getSelection().toString()) copyClip(c, copyBtn); };
 
-    const copyBtn = el("button", { class: "icon-btn copy-main", title: "Copy", ariaLabel: "Copy" }, icon("i-copy"));
+    const copyBtn = el("button", { class: "icon-btn copy-main", title: t("clip.copy"), ariaLabel: t("clip.copy") }, icon("i-copy"));
     copyBtn.onclick = () => copyClip(c, copyBtn);
-    const pinBtn = el("button", { class: "icon-btn hover-only pin-act", title: c.pinned ? "Unpin" : "Pin", ariaLabel: c.pinned ? "Unpin" : "Pin", ariaPressed: String(c.pinned) },
+    const pinBtn = el("button", { class: "icon-btn hover-only pin-act", title: t(c.pinned ? "clip.unpin" : "clip.pin"), ariaLabel: t(c.pinned ? "clip.unpin" : "clip.pin"), ariaPressed: String(c.pinned) },
       icon(c.pinned ? "i-pin-fill" : "i-pin"));
     pinBtn.onclick = () => togglePin(c);
-    const delBtn = el("button", { class: "icon-btn danger hover-only", title: "Delete everywhere", ariaLabel: "Delete" }, icon("i-trash"));
+    const delBtn = el("button", { class: "icon-btn danger hover-only", title: t("clip.delete"), ariaLabel: t("clip.delete") }, icon("i-trash"));
     delBtn.onclick = () => deleteClip(c, li);
 
     const meta = el("div", { class: "meta" },
       el("span", { class: "meta-item" }, el("span", { class: "dev-dot", style: `background:${devColor(c.device_id)}` }),
-        c.device_id === state.self.id ? `${c.device_name} (this)` : c.device_name),
+        c.device_id === state.self.id ? t("thisDevice", { name: c.device_name }) : c.device_name),
       el("span", { class: "meta-item", title: new Date(c.created_at).toLocaleString() }, icon("i-clock"), relTime(c.created_at)),
     );
     if (c.sensitive) {
@@ -852,13 +909,13 @@
         b.append(ttl);
       }
       meta.append(b);
-      const rv = el("button", { class: "reveal" }, masked ? "Show" : "Hide");
+      const rv = el("button", { class: "reveal" }, t(masked ? "clip.show" : "clip.hide"));
       rv.onclick = () => { masked ? revealed.add(c.id) : revealed.delete(c.id); renderClips(); };
       meta.append(rv);
     }
-    if (c.pinned) meta.append(el("span", { class: "badge pin" }, icon("i-pin-fill"), "Pinned"));
+    if (c.pinned) meta.append(el("span", { class: "badge pin" }, icon("i-pin-fill"), t("clip.pinned")));
     if (!masked && !isShort) {
-      const more = el("button", { class: "more" }, expanded.has(c.id) ? "Show less" : "Show more");
+      const more = el("button", { class: "more" }, t(expanded.has(c.id) ? "clip.less" : "clip.more"));
       more.onclick = () => { expanded.has(c.id) ? expanded.delete(c.id) : expanded.add(c.id); renderClips(); };
       meta.append(more);
     }
@@ -873,29 +930,29 @@
     const info = $("resultInfo");
     area.replaceChildren();
     $("footerBar").hidden = !clips.length || !!query || filter.kind !== "all";
-    $("footerCount").textContent = `${state.count} clip${state.count === 1 ? "" : "s"} in history`;
+    $("footerCount").textContent = tn("footer.count", state.count);
     if (query) {
       info.hidden = false;
-      info.textContent = clips.length ? `${clips.length} match${clips.length === 1 ? "" : "es"} for “${query}”` : "";
+      info.textContent = clips.length ? tn("results", clips.length, { q: query }) : "";
     } else info.hidden = true;
 
     if (!clips.length) {
-      const [title, text] = query ? ["No matches", `Nothing you copied contains “${query}”.`]
-        : filter.kind === "pinned" ? ["Nothing pinned", "Pin clips you reach for often — they stay at the top and are never trimmed."]
-        : ["Copy something", state.status.paired ? "Anything you copy on this or a paired computer appears here." : "Anything you copy appears here. Pair another computer to share it."];
+      const [title, text] = query ? [t("empty.search.title"), t("empty.search.text", { q: query })]
+        : filter.kind === "pinned" ? [t("empty.pinned.title"), t("empty.pinned.text")]
+        : [t("empty.title"), t(state.status.paired ? "empty.paired" : "empty.unpaired")];
       area.append(el("div", { class: "empty" }, icon("i-empty"), el("h2", {}, title), el("p", {}, text)));
       return;
     }
     const groups = [];
     if (filter.kind === "all" && !query) {
       const pinned = clips.filter((c) => c.pinned), rest = clips.filter((c) => !c.pinned);
-      if (pinned.length) groups.push(["Pinned", pinned]);
+      if (pinned.length) groups.push([t("group.pinned"), pinned]);
       const today = new Date().toDateString();
       const yesterday = new Date(Date.now() - 86400000).toDateString();
       const by = new Map();
       for (const c of rest) {
         const d = new Date(c.created_at).toDateString();
-        const label = d === today ? "Today" : d === yesterday ? "Yesterday" : new Date(c.created_at).toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long" });
+        const label = d === today ? t("group.today") : d === yesterday ? t("group.yesterday") : new Date(c.created_at).toLocaleDateString(lang, { weekday: "long", day: "numeric", month: "long" });
         if (!by.has(label)) by.set(label, []);
         by.get(label).push(c);
       }
@@ -932,13 +989,14 @@
 
   async function loadState() {
     state = await api("/state");
+    setLang(state.language);
     renderHeader();
     renderChips();
   }
 
   function handleError(e) {
     if (e.status === 401) { showLocked(); return; }
-    toast(e.message, "warn");
+    toast(trErr(e.message), "warn");
   }
 
   /* ---------- actions ---------- */
@@ -948,7 +1006,7 @@
       btn.classList.add("done");
       btn.replaceChildren(icon("i-check"));
       setTimeout(() => { btn.classList.remove("done"); btn.replaceChildren(icon("i-copy")); }, 1200);
-      toast(c.sensitive ? "Copied — it will be cleared when it expires" : "Copied to clipboard");
+      toast(t(c.sensitive ? "toast.copiedSecret" : "toast.copied"));
     } catch (e) { handleError(e); }
   }
   async function togglePin(c) {
@@ -958,7 +1016,7 @@
   function deleteClip(c, li) {
     li.classList.add("removing");
     setTimeout(async () => {
-      try { await api(`/clips/${encodeURIComponent(c.id)}`, { method: "DELETE" }); toast("Deleted on all devices"); }
+      try { await api(`/clips/${encodeURIComponent(c.id)}`, { method: "DELETE" }); toast(t("toast.deleted")); }
       catch (e) { li.classList.remove("removing"); handleError(e); }
     }, 160);
   }
@@ -978,8 +1036,8 @@
   }
 
   $("clearBtn").onclick = async () => {
-    if (!(await confirmAction("Clear history?", "Unpinned clips are deleted on all paired devices. Pinned clips stay.", "Clear"))) return;
-    try { const r = await api("/clips", { method: "DELETE" }); toast(`Cleared ${r.deleted} clip${r.deleted === 1 ? "" : "s"}`); }
+    if (!(await confirmAction(t("confirm.clear.title"), t("confirm.clear.text"), t("confirm.clear.ok")))) return;
+    try { const r = await api("/clips", { method: "DELETE" }); toast(tn("toast.cleared", r.deleted)); }
     catch (e) { handleError(e); }
   };
 
@@ -988,7 +1046,7 @@
   function pairView(view) {
     for (const id of ["pairChoose", "pairShow", "pairEnter", "pairDone"]) $(id).hidden = id !== view;
     $("pairSubmit").hidden = view !== "pairEnter";
-    $("pairCancel").textContent = view === "pairDone" ? "Done" : "Cancel";
+    $("pairCancel").textContent = t(view === "pairDone" ? "done" : "cancel");
     $("pairError").hidden = true;
   }
   function pairError(msg) { const e = $("pairError"); e.querySelector("span").textContent = msg; e.hidden = false; }
@@ -1003,14 +1061,14 @@
     try {
       const ps = await api("/pair/start", { method: "POST" });
       showCode(ps);
-    } catch (e) { pairError(e.message); }
+    } catch (e) { pairError(trErr(e.message)); }
   }
   function showCode(ps) {
     $("pairCode").replaceChildren(...ps.code.split("-").map((g) => el("span", {}, g)));
     clearInterval(countdownTimer);
     const tick = () => {
       const s = Math.round((new Date(ps.expires_at) - Date.now()) / 1000);
-      $("pairCountdown").textContent = s > 0 ? `Expires in ${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}` : "Expired";
+      $("pairCountdown").textContent = s > 0 ? t("pair.expires", { t: `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}` }) : t("pair.expired");
     };
     tick();
     countdownTimer = setInterval(tick, 1000);
@@ -1035,7 +1093,7 @@
     $("joinWaiting").hidden = false;
     $("pairSubmit").disabled = true;
     try { await api("/pair/join", { method: "POST", body: JSON.stringify({ code }) }); }
-    catch (e) { $("joinWaiting").hidden = true; $("pairSubmit").disabled = false; pairError(e.message); }
+    catch (e) { $("joinWaiting").hidden = true; $("pairSubmit").disabled = false; pairError(trErr(e.message)); }
   };
   $("choiceShow").onclick = startShow;
   $("choiceEnter").onclick = startEnter;
@@ -1053,7 +1111,7 @@
       state.autostart = on;
       $("onboardAutostart").checked = on;
       $("sAutostart").checked = on;
-      toast(on ? "Clipferry will start with this computer" : "Clipferry won't start on its own");
+      toast(t(on ? "toast.autostartOn" : "toast.autostartOff"));
     } catch (e) { input.checked = !on; handleError(e); }
   }
   $("onboardAutostart").onchange = (e) => setAutostart(e.target.checked, e.target);
@@ -1068,26 +1126,23 @@
       list.append(el("li", { class: "device" },
         el("span", { class: "ico", style: `background:${devColor(d.id)}` }, icon(platformIcon(d.platform))),
         el("div", { style: "min-width:0" }, el("div", { class: "name" }, d.name),
-          el("div", { class: "sub" }, `${platformName(d.platform)} · ${d.self ? "this device" : online ? "active " + relTime(d.last_seen) : "last seen " + relTime(d.last_seen)}`)),
-        d.self ? el("span", { class: "you" }, "You") : null));
+          el("div", { class: "sub" }, `${platformName(d.platform)} · ${d.self ? t("dev.this") : t(online ? "dev.active" : "dev.lastSeen", { t: relTime(d.last_seen) })}`)),
+        d.self ? el("span", { class: "you" }, t("dev.you")) : null));
     }
     const peers = state.devices.length - 1;
-    $("devicesSub").textContent = state.status.paired ? `${peers ? peers + 1 + " devices share" : "Only this device is in"} this clipboard.` : "This device is not paired yet.";
+    $("devicesSub").textContent = state.status.paired ? (peers ? t("dev.sub", { n: peers + 1 }) : t("dev.subOnly")) : t("dev.subUnpaired");
     $("leaveBtn").hidden = !state.status.paired;
     const st = state.status, relay = state.settings.relay_url.replace(/^wss?:\/\//, "");
     const err = st.error ? ` (${st.error})` : "";
-    $("relayNote").textContent = !st.paired ? "Pair another computer on this Wi-Fi to start sharing your clipboard."
-      : st.mode === "lan"
-        ? (onlinePeers().length ? "Connected directly over your local network — no server involved. Clips are end-to-end encrypted."
-          : `Looking for your other devices on this network. They need to be on the same Wi-Fi with Clipferry running${err}.`)
-        : (st.connected ? `Connected through ${relay}. Clips are end-to-end encrypted; the relay cannot read them.`
-          : `Cannot reach ${relay} right now${err}. Clips will sync once it is back.`);
+    $("relayNote").textContent = (!st.paired ? t("note.unpaired")
+      : st.mode === "lan" ? t(onlinePeers().length ? "note.lanOnline" : "note.lanLooking")
+      : t(st.connected ? "note.relayOnline" : "note.relayDown", { relay })) + (st.error && !(st.mode === "lan" && onlinePeers().length) ? err : "");
   }
   $("statusPill").onclick = () => { renderDevices(); $("devicesDialog").showModal(); };
   $("addDeviceBtn").onclick = () => { $("devicesDialog").close(); openPair(); };
   $("leaveBtn").onclick = async () => {
-    if (!(await confirmAction("Leave this ferry?", "This device stops syncing. Its history stays here; other devices keep theirs.", "Leave"))) return;
-    try { await api("/leave", { method: "POST" }); $("devicesDialog").close(); toast("Left the ferry"); await loadState(); } catch (e) { handleError(e); }
+    if (!(await confirmAction(t("confirm.leave.title"), t("confirm.leave.text"), t("confirm.leave.ok")))) return;
+    try { await api("/leave", { method: "POST" }); $("devicesDialog").close(); toast(t("toast.left")); await loadState(); } catch (e) { handleError(e); }
   };
 
   /* ---------- settings ---------- */
@@ -1097,18 +1152,21 @@
     $("sName").value = s.device_name;
     for (const r of document.querySelectorAll("input[name=secretMode]")) r.checked = r.value === s.secret_mode;
     const ttl = $("sTTL");
-    if (![...ttl.options].some((o) => +o.value === s.secret_ttl_seconds)) ttl.append(el("option", { value: s.secret_ttl_seconds }, `${s.secret_ttl_seconds} seconds`));
+    if (![...ttl.options].some((o) => +o.value === s.secret_ttl_seconds)) ttl.append(el("option", { value: s.secret_ttl_seconds }, t("set.ttlSeconds", { n: s.secret_ttl_seconds })));
     ttl.value = String(s.secret_ttl_seconds);
     $("sApply").checked = s.apply_remote;
     $("sPaused").checked = s.paused;
     $("sMcpSecrets").checked = s.mcp_show_secrets;
     const lim = $("sLimit");
-    if (![...lim.options].some((o) => +o.value === s.history_limit)) lim.append(el("option", { value: s.history_limit }, `${s.history_limit} clips`));
+    if (![...lim.options].some((o) => +o.value === s.history_limit)) lim.append(el("option", { value: s.history_limit }, t("set.clips", { n: s.history_limit })));
     lim.value = String(s.history_limit);
     for (const r of document.querySelectorAll("input[name=conn]")) r.checked = r.value === (s.relay_url ? "relay" : "lan");
     $("sRelay").value = s.relay_url;
     $("sRelayToken").value = s.relay_token || "";
     $("sTheme").value = store.getLocal(THEME_KEY) || "system";
+    $("sLang").value = s.language || "auto";
+    $("sAutoUpdate").checked = s.auto_update;
+    renderUpdate();
     $("settingsError").hidden = true;
     syncTTL();
     syncConn();
@@ -1132,16 +1190,18 @@
       mcp_show_secrets: $("sMcpSecrets").checked,
       history_limit: +$("sLimit").value,
       relay_url: connMode() === "relay" ? $("sRelay").value.trim() : "",
+      language: $("sLang").value,
+      auto_update: $("sAutoUpdate").checked,
       relay_token: $("sRelayToken").value,
     };
     if (connMode() === "relay" && !body.relay_url) {
-      const err = $("settingsError"); err.querySelector("span").textContent = "Enter the relay URL, or choose Same Wi-Fi."; err.hidden = false;
+      const err = $("settingsError"); err.querySelector("span").textContent = t("set.relayMissing"); err.hidden = false;
       return;
     }
     try {
       await api("/settings", { method: "PUT", body: JSON.stringify(body) });
       $("settingsDialog").close();
-      toast("Settings saved");
+      toast(t("toast.saved"));
       await loadState();
       loadClips();
     } catch (e) {
@@ -1151,15 +1211,42 @@
   };
   $("settingsBtn").onclick = openSettings;
 
+  /* ---------- updates ---------- */
+  function renderUpdate() {
+    const u = state && state.update;
+    $("updateSetting").hidden = !u;
+    if (!u) return;
+    const dot = $("updateDot");
+    dot.className = "update-dot";
+    let text;
+    if (u.status === "unsupported") text = t("upd.dev", { v: u.current });
+    else if (u.status === "checking") { text = t("upd.checking"); dot.classList.add("busy"); }
+    else if (u.status === "downloading") { text = t("upd.downloading"); dot.classList.add("busy"); }
+    else if (u.status === "installing") { text = t("upd.installing"); dot.classList.add("busy"); }
+    else if (u.status === "error") { text = t("upd.error", { e: u.error }); dot.classList.add("error"); }
+    else if (u.available) { text = t("upd.available", { v: u.latest }); dot.classList.add("available"); }
+    else text = t("upd.current", { v: u.current });
+    $("updateText").textContent = text;
+    const busy = ["checking", "downloading", "installing"].includes(u.status);
+    $("updateCheck").hidden = u.status === "unsupported" || u.available;
+    $("updateCheck").disabled = busy;
+    $("updateInstall").hidden = !u.available || u.status === "installing";
+    $("updateInstall").disabled = busy;
+    $("updateNotesWrap").hidden = !(u.available && u.notes);
+    $("updateNotes").textContent = u.notes || "";
+  }
+  $("updateCheck").onclick = () => api("/update/check", { method: "POST" }).catch(() => {});
+  $("updateInstall").onclick = () => api("/update/install", { method: "POST" }).catch(handleError);
+
   /* ---------- MCP ---------- */
   let mcpTab = "cursor";
   function renderSnippet() {
     const url = state.mcp_url;
     const header = `Bearer ${token}`;
     const snippets = {
-      cursor: ["Add to ~/.cursor/mcp.json:", JSON.stringify({ mcpServers: { clipferry: { url, headers: { Authorization: header } } } }, null, 2)],
-      vscode: ["Add to .vscode/mcp.json (or your user settings):", JSON.stringify({ servers: { clipferry: { type: "http", url, headers: { Authorization: header } } } }, null, 2)],
-      other: ["Any MCP client with Streamable HTTP support — server URL and header:", `URL:    ${url}\nHeader: Authorization: ${header}`],
+      cursor: [t("mcp.cursor"), JSON.stringify({ mcpServers: { clipferry: { url, headers: { Authorization: header } } } }, null, 2)],
+      vscode: [t("mcp.vscode"), JSON.stringify({ servers: { clipferry: { type: "http", url, headers: { Authorization: header } } } }, null, 2)],
+      other: [t("mcp.otherLabel"), `URL:    ${url}\nHeader: Authorization: ${header}`],
     };
     const [label, code] = snippets[mcpTab];
     $("snippetLabel").textContent = label;
@@ -1168,8 +1255,8 @@
   }
   for (const b of document.querySelectorAll("#mcpDialog [role=tab]")) b.onclick = () => { mcpTab = b.dataset.tab; renderSnippet(); };
   $("copySnippet").onclick = async () => {
-    try { await navigator.clipboard.writeText($("snippet").textContent); toast("Copied"); }
-    catch { const r = document.createRange(); r.selectNodeContents($("snippet")); getSelection().removeAllRanges(); getSelection().addRange(r); toast("Selected — press ⌘C / Ctrl+C"); }
+    try { await navigator.clipboard.writeText($("snippet").textContent); toast(t("toast.snippetCopied")); }
+    catch { const r = document.createRange(); r.selectNodeContents($("snippet")); getSelection().removeAllRanges(); getSelection().addRange(r); toast(t("toast.snippetSelected")); }
   };
   $("mcpBtn").onclick = () => { renderSnippet(); $("mcpDialog").showModal(); };
 
@@ -1200,20 +1287,21 @@
         case "clip.added": refreshSoon(ev.data.id); break;
         case "clip.updated": case "clip.deleted": case "clips.cleared": refreshSoon(); break;
         case "status": case "devices": case "settings": case "autostart": loadState().catch(() => {}); break;
-        case "secret.skipped": toast(`${ev.data.label} kept on this device only`, "warn"); break;
+        case "update": if (state) { state.update = ev.data; renderUpdate(); } break;
+        case "secret.skipped": toast(t("toast.skipped", { label: secretLabel(ev.data.kind) }), "warn"); break;
         case "pair":
           if (ev.data.role === "host" && $("pairDialog").open && !$("pairShow").hidden) showCode(ev.data);
           break;
         case "pair.done":
           clearInterval(countdownTimer);
-          if ($("pairDialog").open) { pairView("pairDone"); $("pairDoneTitle").textContent = `Paired with ${ev.data.name}`; }
-          else toast(`Paired with ${ev.data.name}`);
+          if ($("pairDialog").open) { pairView("pairDone"); $("pairDoneTitle").textContent = t("pair.doneTitle", { name: ev.data.name }); }
+          else toast(t("toast.paired", { name: ev.data.name }));
           loadState().catch(() => {});
           break;
         case "pair.failed":
           clearInterval(countdownTimer);
           $("joinWaiting").hidden = true; $("pairSubmit").disabled = false;
-          if ($("pairDialog").open) pairError(ev.data.error); else toast(ev.data.error, "warn");
+          if ($("pairDialog").open) pairError(trErr(ev.data.error)); else toast(trErr(ev.data.error), "warn");
           break;
       }
     };
