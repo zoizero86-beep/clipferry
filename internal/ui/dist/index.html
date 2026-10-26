@@ -1,0 +1,1251 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Clipferry</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%2322c1b4'/><stop offset='1' stop-color='%232563eb'/></linearGradient></defs><rect width='32' height='32' rx='9' fill='url(%23g)'/><rect x='8' y='7' width='11' height='14' rx='2.5' fill='none' stroke='white' stroke-width='2.2'/><path d='M14 25h9a2 2 0 0 0 2-2V13' fill='none' stroke='white' stroke-width='2.2' stroke-linecap='round'/><path d='m22 16 3-3 3 3' fill='none' stroke='white' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/></svg>">
+<style>
+  :root {
+    --bg: #f5f6f8;
+    --bg-grad: radial-gradient(1000px 520px at 0% -10%, rgba(34,193,180,.10), transparent 60%),
+               radial-gradient(900px 500px at 110% 0%, rgba(37,99,235,.08), transparent 60%);
+    --surface: #ffffff;
+    --surface-2: #f2f4f7;
+    --surface-3: #e9ecf1;
+    --border: #e3e6ec;
+    --border-strong: #d2d7df;
+    --text: #141821;
+    --text-2: #3f4654;
+    --muted: #737b8a;
+    --accent: #2563eb;
+    --accent-2: #22a7c8;
+    --accent-soft: rgba(37,99,235,.09);
+    --accent-text: #ffffff;
+    --danger: #d93a4f;
+    --danger-soft: rgba(217,58,79,.10);
+    --warn: #b7791f;
+    --warn-soft: rgba(214,158,46,.14);
+    --success: #12a26b;
+    --shadow-sm: 0 1px 2px rgba(20,24,40,.05);
+    --shadow: 0 1px 2px rgba(20,24,40,.04), 0 4px 16px rgba(20,24,40,.06);
+    --shadow-lg: 0 12px 40px rgba(20,24,40,.18);
+    --focus: 0 0 0 3px rgba(37,99,235,.25);
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0b0d12;
+      --bg-grad: radial-gradient(1000px 520px at 0% -10%, rgba(34,193,180,.12), transparent 60%),
+                 radial-gradient(900px 500px at 110% 0%, rgba(59,130,246,.10), transparent 60%);
+      --surface: #14171e;
+      --surface-2: #1a1e26;
+      --surface-3: #232833;
+      --border: #252a35;
+      --border-strong: #323846;
+      --text: #eef1f6;
+      --text-2: #c3c9d4;
+      --muted: #8a93a3;
+      --accent: #5b9bff;
+      --accent-2: #3cc8d6;
+      --accent-soft: rgba(91,155,255,.13);
+      --accent-text: #0b0d12;
+      --danger: #f2687e;
+      --danger-soft: rgba(242,104,126,.13);
+      --warn: #e8b553;
+      --warn-soft: rgba(232,181,83,.14);
+      --success: #3ccf91;
+      --shadow-sm: none;
+      --shadow: 0 1px 0 rgba(255,255,255,.02) inset, 0 8px 24px rgba(0,0,0,.28);
+      --shadow-lg: 0 20px 60px rgba(0,0,0,.6);
+      --focus: 0 0 0 3px rgba(91,155,255,.32);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0b0d12;
+    --bg-grad: radial-gradient(1000px 520px at 0% -10%, rgba(34,193,180,.12), transparent 60%),
+               radial-gradient(900px 500px at 110% 0%, rgba(59,130,246,.10), transparent 60%);
+    --surface: #14171e;
+    --surface-2: #1a1e26;
+    --surface-3: #232833;
+    --border: #252a35;
+    --border-strong: #323846;
+    --text: #eef1f6;
+    --text-2: #c3c9d4;
+    --muted: #8a93a3;
+    --accent: #5b9bff;
+    --accent-2: #3cc8d6;
+    --accent-soft: rgba(91,155,255,.13);
+    --accent-text: #0b0d12;
+    --danger: #f2687e;
+    --danger-soft: rgba(242,104,126,.13);
+    --warn: #e8b553;
+    --warn-soft: rgba(232,181,83,.14);
+    --success: #3ccf91;
+    --shadow-sm: none;
+    --shadow: 0 1px 0 rgba(255,255,255,.02) inset, 0 8px 24px rgba(0,0,0,.28);
+    --shadow-lg: 0 20px 60px rgba(0,0,0,.6);
+    --focus: 0 0 0 3px rgba(91,155,255,.32);
+    color-scheme: dark;
+  }
+  :root[data-theme="light"] { color-scheme: light; }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; min-height: 100%; }
+  body {
+    background: var(--bg-grad), var(--bg);
+    background-attachment: fixed;
+    color: var(--text);
+    font: 14px/1.5 ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", Roboto, "Helvetica Neue", sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  button, input, select, textarea { font: inherit; color: inherit; }
+  button { cursor: pointer; }
+  [hidden] { display: none !important; }
+  :focus { outline: none; }
+  :focus-visible { box-shadow: var(--focus); border-radius: 8px; }
+  ::selection { background: var(--accent-soft); }
+  kbd {
+    font: 11px/1 var(--mono); color: var(--muted);
+    border: 1px solid var(--border-strong); border-bottom-width: 2px; border-radius: 5px; padding: 2px 5px; background: var(--surface);
+  }
+  code { font: 12.5px var(--mono); background: var(--surface-2); padding: 1px 6px; border-radius: 5px; overflow-wrap: anywhere; }
+
+  /* Buttons */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 7px; white-space: nowrap;
+    border: 1px solid var(--border); background: var(--surface); color: var(--text-2);
+    border-radius: 9px; padding: 7px 12px; font-weight: 500; box-shadow: var(--shadow-sm);
+    transition: background .15s, border-color .15s, color .15s, transform .05s;
+  }
+  .btn:hover { background: var(--surface-2); color: var(--text); border-color: var(--border-strong); }
+  .btn:active { transform: translateY(1px); }
+  .btn svg { width: 15px; height: 15px; flex: none; }
+  .btn-primary {
+    background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 88%, white), var(--accent)); border-color: transparent;
+    color: var(--accent-text); font-weight: 600; box-shadow: 0 1px 2px rgba(30,60,200,.25), inset 0 1px 0 rgba(255,255,255,.18);
+  }
+  .btn-primary:hover { color: var(--accent-text); filter: brightness(1.06); background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 88%, white), var(--accent)); border-color: transparent; }
+  .btn-primary:disabled { opacity: .5; cursor: default; filter: none; }
+  .btn-danger { background: var(--danger); border-color: transparent; color: #fff; }
+  .btn-danger:hover { background: var(--danger); color: #fff; filter: brightness(1.06); border-color: transparent; }
+  .btn-ghost { background: none; border-color: transparent; box-shadow: none; }
+  .icon-btn {
+    display: inline-grid; place-items: center; width: 32px; height: 32px; border-radius: 8px; flex: none;
+    border: 0; background: none; color: var(--muted); transition: background .15s, color .15s;
+  }
+  .icon-btn:hover { background: var(--surface-3); color: var(--text); }
+  .icon-btn.danger:hover { background: var(--danger-soft); color: var(--danger); }
+  .icon-btn[aria-pressed="true"] { color: var(--accent); }
+  .icon-btn svg { width: 16px; height: 16px; }
+
+  .field {
+    width: 100%; border: 1px solid var(--border); background: var(--surface); border-radius: 10px;
+    padding: 9px 12px; transition: border-color .15s, box-shadow .15s;
+  }
+  .field::placeholder { color: var(--muted); }
+  .field:focus { border-color: var(--accent); box-shadow: var(--focus); }
+
+  /* Header */
+  header {
+    position: sticky; top: 0; z-index: 10; height: 56px;
+    display: flex; align-items: center; gap: 8px; padding: 0 16px;
+    background: color-mix(in srgb, var(--surface) 82%, transparent);
+    backdrop-filter: saturate(160%) blur(14px); -webkit-backdrop-filter: saturate(160%) blur(14px);
+    border-bottom: 1px solid var(--border);
+  }
+  .brand { display: flex; align-items: center; gap: 9px; font-weight: 700; font-size: 15px; letter-spacing: -.01em; }
+  .brand-mark { width: 28px; height: 28px; flex: none; }
+  header .spacer { flex: 1; }
+  .status-pill {
+    display: inline-flex; align-items: center; gap: 7px; font-size: 12px; color: var(--text-2); font-weight: 500;
+    padding: 4px 10px; border: 1px solid var(--border); border-radius: 999px; background: var(--surface);
+    white-space: nowrap;
+  }
+  button.status-pill:hover { border-color: var(--border-strong); }
+  .status-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); flex: none; }
+  .status-pill[data-state="online"] .status-dot { background: var(--success); box-shadow: 0 0 0 3px color-mix(in srgb, var(--success) 22%, transparent); }
+  .status-pill[data-state="offline"] .status-dot { background: var(--warn); box-shadow: 0 0 0 3px color-mix(in srgb, var(--warn) 22%, transparent); }
+  .status-pill[data-state="paused"] .status-dot { background: var(--muted); }
+
+  main { padding: 18px 16px 56px; }
+  .container { max-width: 760px; margin: 0 auto; }
+
+  /* Onboarding */
+  .onboard {
+    display: grid; grid-template-columns: auto 1fr; gap: 16px; align-items: center;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 18px;
+    box-shadow: var(--shadow); margin-bottom: 18px; position: relative; overflow: hidden;
+  }
+  .onboard::before {
+    content: ""; position: absolute; inset: 0 0 auto 0; height: 3px;
+    background: linear-gradient(90deg, var(--accent-2), var(--accent));
+  }
+  .onboard-art { width: 64px; height: 64px; color: var(--accent); }
+  .onboard h2 { margin: 0 0 4px; font-size: 16px; letter-spacing: -.01em; }
+  .onboard p { margin: 0 0 12px; color: var(--muted); font-size: 13px; }
+  .onboard .actions { display: flex; flex-wrap: wrap; gap: 8px; }
+  .onboard-login { display: flex; align-items: center; gap: 10px; margin-top: 14px; font-size: 13px; color: var(--text-2); cursor: pointer; }
+
+  /* Toolbar */
+  .toolbar { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+  .search-wrap { position: relative; flex: 1; min-width: 0; }
+  .search-wrap > svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: var(--muted); pointer-events: none; }
+  .search-wrap .field { padding-left: 38px; padding-right: 40px; height: 40px; }
+  .search-wrap kbd { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); pointer-events: none; }
+  .search-wrap .field:focus ~ kbd, .search-wrap .field:not(:placeholder-shown) ~ kbd { display: none; }
+  .chips { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding: 2px 1px 8px; margin-bottom: 4px; }
+  .chips::-webkit-scrollbar { display: none; }
+  .chip {
+    display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; flex: none;
+    border: 1px solid var(--border); background: var(--surface); color: var(--text-2);
+    border-radius: 999px; padding: 4px 11px; font-size: 12.5px; font-weight: 500;
+  }
+  .chip:hover { border-color: var(--border-strong); color: var(--text); }
+  .chip[aria-pressed="true"] { background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 35%, transparent); color: var(--accent); }
+  .chip svg { width: 13px; height: 13px; }
+  .chip .dot { width: 7px; height: 7px; border-radius: 50%; }
+  .result-info { font-size: 12.5px; color: var(--muted); margin: 0 2px 10px; }
+
+  .group-label {
+    font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .08em;
+    color: var(--muted); margin: 18px 4px 8px; display: flex; align-items: center; gap: 10px;
+  }
+  .group-label::after { content: ""; flex: 1; height: 1px; background: var(--border); }
+  .group-label:first-child { margin-top: 2px; }
+
+  /* Clips */
+  .clips { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+  .clip {
+    position: relative; background: var(--surface); border: 1px solid var(--border); border-radius: 13px;
+    padding: 12px 14px 10px; box-shadow: var(--shadow-sm);
+    transition: border-color .15s, box-shadow .15s, opacity .2s, transform .2s;
+    animation: rise .22s ease both;
+  }
+  .clip:hover { border-color: var(--border-strong); box-shadow: var(--shadow); }
+  .clip.removing { opacity: 0; transform: scale(.98); }
+  .clip.flash { animation: rise .22s ease both, flash 1.4s ease; }
+  @keyframes rise { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+  @keyframes flash { 0%, 30% { border-color: var(--accent); box-shadow: var(--focus); } }
+  .clip .content {
+    margin: 0; background: none; border: 0; border-radius: 0; padding: 0; white-space: pre-wrap; overflow-wrap: anywhere; color: var(--text); padding-right: 104px;
+    font: 13px/1.55 var(--mono); tab-size: 4; max-height: 8.3em; overflow: hidden; cursor: pointer;
+    -webkit-mask-image: linear-gradient(180deg, #000 70%, transparent);
+            mask-image: linear-gradient(180deg, #000 70%, transparent);
+  }
+  .clip .content.short { -webkit-mask-image: none; mask-image: none; }
+  .clip.expanded .content { max-height: none; -webkit-mask-image: none; mask-image: none; }
+  .clip .content.prose { font: 14px/1.55 inherit; font-family: inherit; }
+  .clip .content mark { background: color-mix(in srgb, var(--accent) 22%, transparent); color: inherit; border-radius: 3px; padding: 0 1px; }
+  .clip.sensitive .content.masked { letter-spacing: .14em; color: var(--muted); -webkit-mask-image: none; mask-image: none; cursor: default; user-select: none; }
+  .clip .actions { position: absolute; top: 6px; right: 6px; display: flex; gap: 0; }
+  .clip .actions .icon-btn { width: 32px; height: 32px; }
+  .clip .actions .hover-only { opacity: 0; transition: opacity .15s; }
+  .clip:hover .actions .hover-only, .clip:focus-within .actions .hover-only { opacity: 1; }
+  @media (hover: none) { .clip .actions .hover-only { opacity: 1; } }
+  .copy-main { color: var(--text-2); }
+  .copy-main.done { color: var(--success); }
+  .meta { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; margin-top: 8px; color: var(--muted); font-size: 12px; }
+  .meta-item { display: inline-flex; align-items: center; gap: 5px; }
+  .meta-item svg { width: 13px; height: 13px; }
+  .dev-dot { width: 7px; height: 7px; border-radius: 50%; flex: none; }
+  .badge {
+    display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; font-weight: 600; border-radius: 999px; padding: 1px 8px;
+    background: var(--warn-soft); color: var(--warn);
+  }
+  .badge svg { width: 12px; height: 12px; }
+  .badge.pin { background: var(--accent-soft); color: var(--accent); }
+  .reveal { border: 0; background: none; color: var(--accent); font-size: 12px; font-weight: 600; padding: 0; }
+  .more { border: 0; background: none; color: var(--muted); font-size: 12px; padding: 0; }
+  .more:hover, .reveal:hover { text-decoration: underline; }
+
+  .empty {
+    text-align: center; padding: 48px 24px; border: 1px dashed var(--border-strong); border-radius: 16px;
+    background: color-mix(in srgb, var(--surface) 50%, transparent);
+  }
+  .empty svg { width: 60px; height: 60px; margin-bottom: 10px; color: var(--accent); }
+  .empty h2 { margin: 0 0 6px; font-size: 16px; letter-spacing: -.01em; }
+  .empty p { margin: 0 auto; color: var(--muted); max-width: 360px; font-size: 13px; }
+
+  .skeleton { height: 70px; border-radius: 13px; background: linear-gradient(90deg, var(--surface-2), var(--surface-3), var(--surface-2)); background-size: 200% 100%; animation: shimmer 1.2s infinite; }
+  @keyframes shimmer { to { background-position: -200% 0; } }
+
+  .footer-bar { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: 18px; color: var(--muted); font-size: 12px; }
+  .link-btn { border: 0; background: none; color: var(--muted); font-size: 12px; padding: 4px 0; }
+  .link-btn:hover { color: var(--danger); text-decoration: underline; }
+
+  /* Dialogs */
+  dialog {
+    border: 1px solid var(--border); border-radius: 18px; padding: 0; width: min(520px, calc(100vw - 24px));
+    background: var(--surface); color: var(--text); box-shadow: var(--shadow-lg); max-height: calc(100vh - 24px);
+  }
+  dialog[open] { display: flex; flex-direction: column; animation: pop .18s ease both; }
+  @keyframes pop { from { opacity: 0; transform: translateY(8px) scale(.98); } to { opacity: 1; transform: none; } }
+  dialog::backdrop { background: rgba(8,10,20,.5); backdrop-filter: blur(3px); }
+  .dlg-head { display: flex; align-items: flex-start; gap: 12px; padding: 20px 20px 0; }
+  .dlg-head h2 { margin: 0; font-size: 17px; letter-spacing: -.015em; }
+  .dlg-head p { margin: 3px 0 0; color: var(--muted); font-size: 13px; }
+  .dlg-head .spacer { flex: 1; }
+  .dlg-body { padding: 16px 20px 8px; overflow-y: auto; }
+  .dlg-foot { display: flex; justify-content: flex-end; gap: 8px; padding: 12px 20px 18px; flex-wrap: wrap; }
+  .dlg-foot .left { margin-right: auto; }
+
+  .tabs { display: inline-flex; background: var(--surface-2); border-radius: 10px; padding: 3px; gap: 2px; margin-bottom: 12px; max-width: 100%; overflow-x: auto; }
+  .tabs button { border: 0; background: none; padding: 6px 12px; border-radius: 8px; color: var(--muted); font-weight: 500; font-size: 13px; white-space: nowrap; }
+  .tabs button[aria-selected="true"] { background: var(--surface); color: var(--text); box-shadow: var(--shadow-sm); }
+
+  /* Pairing */
+  .code {
+    display: flex; justify-content: center; gap: 10px; margin: 6px 0 10px;
+    font: 700 34px/1 var(--mono); letter-spacing: .04em; color: var(--text); user-select: all;
+  }
+  .code span { background: var(--surface-2); border: 1px solid var(--border); border-radius: 12px; padding: 12px 12px; }
+  .countdown { text-align: center; color: var(--muted); font-size: 12.5px; margin-bottom: 4px; }
+  .waiting { display: flex; align-items: center; justify-content: center; gap: 8px; color: var(--text-2); font-size: 13px; margin: 12px 0 4px; }
+  .spinner { width: 15px; height: 15px; border-radius: 50%; border: 2px solid var(--border-strong); border-top-color: var(--accent); animation: spin .8s linear infinite; flex: none; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .code-input { text-align: center; font: 600 26px/1 var(--mono); letter-spacing: .1em; height: 60px; }
+  .pair-done { text-align: center; padding: 8px 0 4px; }
+  .pair-done .big-check { width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center; margin: 0 auto 12px; background: color-mix(in srgb, var(--success) 15%, transparent); color: var(--success); }
+  .pair-done .big-check svg { width: 26px; height: 26px; }
+  .pair-done h3 { margin: 0 0 4px; font-size: 16px; }
+  .pair-done p { margin: 0; color: var(--muted); }
+  .form-error { color: var(--danger); font-size: 13px; display: flex; gap: 6px; align-items: flex-start; margin-top: 10px; }
+  .form-error svg { width: 15px; height: 15px; flex: none; margin-top: 2px; }
+  .choice { display: grid; gap: 10px; }
+  .choice button {
+    display: grid; grid-template-columns: 40px 1fr; gap: 12px; align-items: center; text-align: left;
+    border: 1px solid var(--border); background: var(--surface); border-radius: 13px; padding: 14px;
+  }
+  .choice button:hover { border-color: var(--accent); background: var(--accent-soft); }
+  .choice .ico { width: 40px; height: 40px; border-radius: 11px; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent); }
+  .choice .ico svg { width: 20px; height: 20px; }
+  .choice strong { display: block; font-size: 14px; }
+  .choice span.sub { color: var(--muted); font-size: 12.5px; }
+
+  /* Devices */
+  .devices { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+  .device { display: grid; grid-template-columns: 38px 1fr auto; gap: 12px; align-items: center; padding: 10px 12px; border: 1px solid var(--border); border-radius: 12px; }
+  .device .ico { width: 38px; height: 38px; border-radius: 10px; display: grid; place-items: center; color: #fff; }
+  .device .ico svg { width: 19px; height: 19px; }
+  .device .name { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .device .sub { color: var(--muted); font-size: 12px; }
+  .you { font-size: 11px; font-weight: 600; color: var(--accent); background: var(--accent-soft); border-radius: 999px; padding: 1px 8px; }
+
+  /* Settings */
+  .setting { display: grid; gap: 6px; padding: 12px 0; border-bottom: 1px solid var(--border); }
+  .setting:last-child { border-bottom: 0; }
+  .setting > label, .setting .label { font-weight: 600; font-size: 13.5px; }
+  .setting .help { color: var(--muted); font-size: 12.5px; margin: 0; }
+  .row { display: flex; align-items: center; gap: 12px; justify-content: space-between; }
+  .segmented { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+  .segmented label {
+    border: 1px solid var(--border); border-radius: 10px; padding: 8px 10px; cursor: pointer; font-size: 12.5px; color: var(--muted);
+    display: grid; gap: 2px;
+  }
+  .segmented label strong { color: var(--text); font-size: 13px; }
+  .segmented input { position: absolute; opacity: 0; pointer-events: none; }
+  .segmented label:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); }
+  .segmented label:has(input:focus-visible) { box-shadow: var(--focus); }
+  .switch { position: relative; width: 38px; height: 22px; flex: none; }
+  .switch input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; z-index: 1; }
+  .switch span { position: absolute; inset: 0; border-radius: 999px; background: var(--surface-3); border: 1px solid var(--border-strong); transition: background .15s; pointer-events: none; }
+  .switch span::after { content: ""; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.25); transition: transform .15s; }
+  .switch input:checked + span { background: var(--accent); border-color: transparent; }
+  .switch input:checked + span::after { transform: translateX(16px); }
+  .switch input:focus-visible + span { box-shadow: var(--focus); }
+  select.field { appearance: none; padding-right: 32px; background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%), linear-gradient(135deg, var(--muted) 50%, transparent 50%); background-position: calc(100% - 17px) 55%, calc(100% - 12px) 55%; background-size: 5px 5px; background-repeat: no-repeat; }
+  .segmented.two { grid-template-columns: 1fr 1fr; }
+  .relay-fields { display: grid; gap: 6px; margin-top: 6px; }
+  details summary { cursor: pointer; color: var(--text-2); font-weight: 600; font-size: 13px; padding: 10px 0; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+  .snippet-label { font-size: 12.5px; color: var(--muted); margin: 0 0 8px; }
+  .code-wrap { position: relative; }
+  pre {
+    margin: 0; background: var(--surface-2); border: 1px solid var(--border); border-radius: 12px;
+    padding: 14px 16px; overflow-x: auto; font: 12px/1.6 var(--mono); color: var(--text-2); white-space: pre;
+  }
+  #snippet { white-space: pre-wrap; overflow-wrap: anywhere; padding-top: 44px; }
+  .copy-btn { position: absolute; top: 8px; right: 8px; padding: 5px 10px; font-size: 12px; }
+  .note { margin: 12px 0 0; padding: 10px 12px; border-radius: 10px; background: var(--surface-2); color: var(--text-2); font-size: 12.5px; }
+
+  .confirm-icon { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; flex: none; background: var(--danger-soft); color: var(--danger); }
+  .confirm-icon svg { width: 20px; height: 20px; }
+  #confirmDialog { width: min(420px, calc(100vw - 24px)); }
+
+  .toast {
+    position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 50; max-width: calc(100vw - 32px);
+    display: flex; align-items: center; gap: 9px;
+    background: var(--text); color: var(--bg); padding: 10px 16px; border-radius: 12px; font-size: 13px; font-weight: 500;
+    box-shadow: var(--shadow-lg); animation: toast-in .18s ease both;
+  }
+  @keyframes toast-in { from { opacity: 0; transform: translate(-50%, 8px); } to { opacity: 1; transform: translate(-50%, 0); } }
+  .toast svg { width: 16px; height: 16px; color: var(--success); flex: none; }
+  .toast.warn svg { color: var(--warn); }
+
+  .locked { min-height: calc(100vh - 56px); display: grid; place-items: center; padding: 24px 16px; text-align: center; }
+  .locked .card { max-width: 380px; }
+  .locked .brand-mark { width: 52px; height: 52px; margin-bottom: 14px; }
+  .locked h1 { margin: 0 0 6px; font-size: 20px; }
+  .locked p { color: var(--muted); margin: 0; }
+
+  @media (max-width: 560px) {
+    header { padding: 0 10px; gap: 4px; }
+    .brand span.word { display: none; }
+    main { padding: 14px 12px 48px; }
+    .onboard { grid-template-columns: 1fr; padding: 16px; }
+    .onboard-art { display: none; }
+    .onboard .actions .btn { flex: 1; }
+    .search-wrap kbd { display: none; }
+    .clip .content { padding-right: 70px; }
+    .clip .actions .hover-only.pin-act { display: none; }
+    .code { font-size: 26px; gap: 6px; }
+    .code span { padding: 10px 8px; }
+    .segmented, .segmented.two { grid-template-columns: 1fr; }
+    .grid-2 { grid-template-columns: 1fr; }
+    .dlg-head, .dlg-body { padding-left: 16px; padding-right: 16px; }
+    .dlg-foot { padding: 12px 16px 16px; }
+    .dlg-foot .btn { flex: 1; }
+    .dlg-foot .left { flex-basis: 100%; margin-right: 0; order: 2; }
+  }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="brandGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#22c1b4"/><stop offset="1" stop-color="#2563eb"/></linearGradient>
+    <symbol id="i-brand" viewBox="0 0 32 32"><rect width="32" height="32" rx="9" fill="url(#brandGrad)"/><rect x="8" y="7" width="11" height="14" rx="2.5" fill="none" stroke="white" stroke-width="2.2"/><path d="M14 25h9a2 2 0 0 0 2-2V13" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round"/><path d="m22 16 3-3 3 3" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></g></symbol>
+    <symbol id="i-gear" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></g></symbol>
+    <symbol id="i-plug" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 7V3M15 7V3M6 7h12v4a6 6 0 0 1-12 0V7zM12 17v4"/></g></symbol>
+    <symbol id="i-link" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 14a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 10a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></g></symbol>
+    <symbol id="i-hash" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 9h15M4 15h15M10 3 8 21M16 3l-2 18"/></g></symbol>
+    <symbol id="i-keyboard" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10"/></g></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></g></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></g></symbol>
+    <symbol id="i-pin" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17v5M8 3h8l-1 6 3 4H6l3-4-1-6z"/></g></symbol>
+    <symbol id="i-pin-fill" viewBox="0 0 24 24"><g stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17v5" fill="none"/><path d="M8 3h8l-1 6 3 4H6l3-4-1-6z" fill="currentColor"/></g></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></g></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 6v6c0 5 3.4 8.3 8 9 4.6-.7 8-4 8-9V6l-8-3z"/><path d="m9 12 2 2 4-4"/></g></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></g></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 5 5 9-10" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2 20h20L12 3zM12 10v4M12 17h.01"/></g></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+    <symbol id="i-laptop" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="11" rx="2"/><path d="M2 20h20"/></g></symbol>
+    <symbol id="i-monitor" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></g></symbol>
+    <symbol id="i-devices" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="14" height="10" rx="2"/><path d="M5 18h8"/><rect x="17" y="8" width="5" height="12" rx="1.5"/></g></symbol>
+    <symbol id="i-pause" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M9 6v12M15 6v12"/></g></symbol>
+    <symbol id="i-empty" viewBox="0 0 64 64"><g fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="14" y="10" width="30" height="38" rx="6" opacity=".35"/><path d="M22 22h14M22 30h10" opacity=".6"/><path d="M30 54h18a6 6 0 0 0 6-6V26"/><path d="m48 32 6-6 6 6"/></g></symbol>
+    <symbol id="i-ferry" viewBox="0 0 64 64"><g fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="14" width="22" height="16" rx="3"/><path d="M10 36h10"/><rect x="40" y="18" width="20" height="14" rx="3"/><path d="M44 38h12M50 32v6"/><path d="M28 24h10" stroke-dasharray="2 4"/><path d="m35 20 4 4-4 4"/><path d="M36 44H26" stroke-dasharray="2 4"/><path d="m29 40-4 4 4 4"/></g></symbol>
+  </defs>
+</svg>
+
+<header>
+  <div class="brand"><svg class="brand-mark"><use href="#i-brand"/></svg><span class="word">Clipferry</span></div>
+  <div class="spacer"></div>
+  <button class="status-pill" id="statusPill" hidden title="Devices"><span class="status-dot"></span><span id="statusText"></span></button>
+  <button class="icon-btn" id="mcpBtn" hidden title="Connect an AI tool" aria-label="Connect an AI tool"><svg><use href="#i-plug"/></svg></button>
+  <button class="icon-btn" id="settingsBtn" hidden title="Settings" aria-label="Settings"><svg><use href="#i-gear"/></svg></button>
+</header>
+
+<section class="locked" id="lockedView" hidden>
+  <div class="card">
+    <svg class="brand-mark"><use href="#i-brand"/></svg>
+    <h1>Open Clipferry from its icon</h1>
+    <p>This window is part of the Clipferry app. Click the Clipferry icon in the menu bar (Mac) or the system tray (Windows) and choose <strong>Open Clipferry</strong>.</p>
+  </div>
+</section>
+
+<main id="appView" hidden>
+  <div class="container">
+    <section class="onboard" id="onboard" hidden>
+      <svg class="onboard-art"><use href="#i-ferry"/></svg>
+      <div>
+        <h2>Connect your other computer</h2>
+        <p>Install Clipferry on a computer on the same Wi-Fi, then pair the two with a one-time code. No account, no server — clips go directly and encrypted.</p>
+        <div class="actions">
+          <button class="btn btn-primary" id="onboardShow"><svg><use href="#i-hash"/></svg>Show a code</button>
+          <button class="btn" id="onboardEnter"><svg><use href="#i-keyboard"/></svg>Enter a code</button>
+        </div>
+        <label class="onboard-login" id="onboardLogin" hidden>
+          <span class="switch"><input type="checkbox" id="onboardAutostart"><span></span></span>
+          <span>Start Clipferry when this computer starts</span>
+        </label>
+      </div>
+    </section>
+
+    <div class="toolbar">
+      <div class="search-wrap">
+        <svg><use href="#i-search"/></svg>
+        <input class="field" id="searchInput" type="search" placeholder="Search everything you copied…" aria-label="Search clips" autocomplete="off">
+        <kbd>/</kbd>
+      </div>
+    </div>
+    <div class="chips" id="chips" role="toolbar" aria-label="Filter"></div>
+    <div class="result-info" id="resultInfo" hidden></div>
+    <div id="clipArea"></div>
+    <div class="footer-bar" id="footerBar" hidden>
+      <span id="footerCount"></span>
+      <button class="link-btn" id="clearBtn">Clear unpinned history</button>
+    </div>
+  </div>
+</main>
+
+<!-- Pairing -->
+<dialog id="pairDialog" aria-labelledby="pairTitle">
+  <div class="dlg-head">
+    <div><h2 id="pairTitle">Add a device</h2><p id="pairSub">Pair another computer with a one-time code.</p></div>
+    <div class="spacer"></div>
+    <button class="icon-btn" data-close aria-label="Close"><svg><use href="#i-x"/></svg></button>
+  </div>
+  <div class="dlg-body">
+    <div id="pairChoose" class="choice">
+      <button id="choiceShow"><span class="ico"><svg><use href="#i-hash"/></svg></span><span><strong>Show a code on this computer</strong><span class="sub">Then type it on the other one.</span></span></button>
+      <button id="choiceEnter"><span class="ico"><svg><use href="#i-keyboard"/></svg></span><span><strong>Enter a code from the other computer</strong><span class="sub">It is showing a 9-digit code.</span></span></button>
+    </div>
+    <div id="pairShow" hidden>
+      <p class="snippet-label" style="text-align:center">On the other computer, open Clipferry → <strong>Enter a code</strong> and type:</p>
+      <div class="code" id="pairCode" aria-live="polite"></div>
+      <div class="countdown" id="pairCountdown"></div>
+      <div class="waiting"><span class="spinner"></span>Waiting for the other device…</div>
+    </div>
+    <form id="pairEnter" hidden>
+      <label class="snippet-label" for="codeInput">Type the code shown on the other computer:</label>
+      <input class="field code-input" id="codeInput" inputmode="numeric" autocomplete="one-time-code" placeholder="123-456-789" maxlength="11" aria-label="Pairing code">
+      <div class="waiting" id="joinWaiting" hidden><span class="spinner"></span>Finding the other computer and connecting securely…</div>
+    </form>
+    <div id="pairDone" class="pair-done" hidden>
+      <div class="big-check"><svg><use href="#i-check"/></svg></div>
+      <h3 id="pairDoneTitle">Paired</h3>
+      <p>Copy something on either computer — it shows up on the other.</p>
+    </div>
+    <div class="form-error" id="pairError" hidden><svg><use href="#i-alert"/></svg><span></span></div>
+  </div>
+  <div class="dlg-foot">
+    <button class="btn" data-close id="pairCancel">Cancel</button>
+    <button class="btn btn-primary" id="pairSubmit" hidden>Pair</button>
+  </div>
+</dialog>
+
+<!-- Devices -->
+<dialog id="devicesDialog" aria-labelledby="devicesTitle">
+  <div class="dlg-head">
+    <div><h2 id="devicesTitle">Devices</h2><p id="devicesSub"></p></div>
+    <div class="spacer"></div>
+    <button class="icon-btn" data-close aria-label="Close"><svg><use href="#i-x"/></svg></button>
+  </div>
+  <div class="dlg-body"><ul class="devices" id="deviceList"></ul><p class="note" id="relayNote"></p></div>
+  <div class="dlg-foot">
+    <button class="btn btn-ghost left" id="leaveBtn" style="color:var(--danger)">Leave this ferry</button>
+    <button class="btn btn-primary" id="addDeviceBtn"><svg><use href="#i-link"/></svg>Add a device</button>
+  </div>
+</dialog>
+
+<!-- Settings -->
+<dialog id="settingsDialog" aria-labelledby="settingsTitle">
+  <div class="dlg-head">
+    <div><h2 id="settingsTitle">Settings</h2><p id="versionText"></p></div>
+    <div class="spacer"></div>
+    <button class="icon-btn" data-close aria-label="Close"><svg><use href="#i-x"/></svg></button>
+  </div>
+  <form class="dlg-body" id="settingsForm">
+    <div class="setting">
+      <label for="sName">This device's name</label>
+      <input class="field" id="sName" maxlength="64" required>
+    </div>
+    <div class="setting">
+      <span class="label">Passwords, keys and codes</span>
+      <p class="help">Clipferry recognises API keys, tokens, private keys, passwords and one-time codes before anything leaves this device.</p>
+      <div class="segmented" role="radiogroup" aria-label="Secret handling">
+        <label><input type="radio" name="secretMode" value="expire"><strong>Sync briefly</strong>Masked, deleted everywhere after a few minutes</label>
+        <label><input type="radio" name="secretMode" value="skip"><strong>Keep local</strong>Never leaves this device</label>
+        <label><input type="radio" name="secretMode" value="sync"><strong>Sync normally</strong>Masked, but kept in history</label>
+      </div>
+      <div class="row" id="ttlRow">
+        <label for="sTTL" class="help" style="margin:0">Delete secrets after</label>
+        <select class="field" id="sTTL" style="width:auto">
+          <option value="60">1 minute</option><option value="120">2 minutes</option><option value="300">5 minutes</option>
+          <option value="900">15 minutes</option><option value="3600">1 hour</option>
+        </select>
+      </div>
+    </div>
+    <div class="setting">
+      <div class="row"><label for="sApply">Paste clips from other devices automatically</label><span class="switch"><input type="checkbox" id="sApply"><span></span></span></div>
+      <p class="help">When off, clips from other devices only land in history.</p>
+    </div>
+    <div class="setting" id="autostartSetting" hidden>
+      <div class="row"><label for="sAutostart">Start Clipferry when this computer starts</label><span class="switch"><input type="checkbox" id="sAutostart"><span></span></span></div>
+      <p class="help">Keeps your clipboard in sync without having to open the app. Changes apply immediately.</p>
+    </div>
+    <div class="setting">
+      <div class="row"><label for="sPaused">Pause syncing</label><span class="switch"><input type="checkbox" id="sPaused"><span></span></span></div>
+    </div>
+    <div class="setting">
+      <div class="row"><label for="sMcpSecrets">Let AI tools read secrets</label><span class="switch"><input type="checkbox" id="sMcpSecrets"><span></span></span></div>
+      <p class="help">Off by default: AI tools see that a secret was copied, not what it is.</p>
+    </div>
+    <div class="setting">
+      <div class="grid-2">
+        <div><label for="sTheme" class="label">Appearance</label>
+          <select class="field" id="sTheme" style="margin-top:6px"><option value="system">System</option><option value="light">Light</option><option value="dark">Dark</option></select></div>
+        <div><label for="sLimit" class="label">Keep history</label>
+          <select class="field" id="sLimit" style="margin-top:6px"><option value="100">100 clips</option><option value="500">500 clips</option><option value="2000">2,000 clips</option><option value="10000">10,000 clips</option></select></div>
+      </div>
+    </div>
+    <div class="setting">
+      <span class="label">Connection</span>
+      <div class="segmented two" role="radiogroup" aria-label="Connection">
+        <label><input type="radio" name="conn" value="lan"><strong>Same Wi-Fi</strong>Direct, no server. Devices must share a network.</label>
+        <label><input type="radio" name="conn" value="relay"><strong>Relay server</strong>Works across networks, through a relay you run.</label>
+      </div>
+      <div id="relayFields" class="relay-fields">
+        <p class="help">The relay only forwards encrypted data and cannot read your clips. Use the same settings on every device.</p>
+        <label for="sRelay" class="help">Relay URL</label>
+        <input class="field" id="sRelay" placeholder="wss://relay.example.com" spellcheck="false">
+        <label for="sRelayToken" class="help">Relay token (only for private relays)</label>
+        <input class="field" id="sRelayToken" type="password" autocomplete="off" spellcheck="false">
+      </div>
+    </div>
+    <div class="form-error" id="settingsError" hidden><svg><use href="#i-alert"/></svg><span></span></div>
+  </form>
+  <div class="dlg-foot">
+    <button class="btn" data-close>Cancel</button>
+    <button class="btn btn-primary" id="settingsSave">Save</button>
+  </div>
+</dialog>
+
+<!-- MCP -->
+<dialog id="mcpDialog" aria-labelledby="mcpTitle">
+  <div class="dlg-head">
+    <div><h2 id="mcpTitle">Connect an AI tool</h2><p>Let Cursor, VS Code or any MCP client read what you copied on any of your computers.</p></div>
+    <div class="spacer"></div>
+    <button class="icon-btn" data-close aria-label="Close"><svg><use href="#i-x"/></svg></button>
+  </div>
+  <div class="dlg-body">
+    <div class="tabs" role="tablist">
+      <button role="tab" aria-selected="true" data-tab="cursor">Cursor</button>
+      <button role="tab" aria-selected="false" data-tab="vscode">VS Code</button>
+      <button role="tab" aria-selected="false" data-tab="other">Other</button>
+    </div>
+    <p class="snippet-label" id="snippetLabel"></p>
+    <div class="code-wrap"><pre id="snippet"></pre><button class="btn copy-btn" id="copySnippet"><svg><use href="#i-copy"/></svg>Copy</button></div>
+    <p class="note">Then ask: <em>“Use what I just copied on my other computer.”</em> The snippet contains this device's private access token, so keep it to yourself. Secrets stay withheld unless you allow it in Settings.</p>
+  </div>
+  <div class="dlg-foot"><button class="btn" data-close>Done</button></div>
+</dialog>
+
+<dialog id="confirmDialog" aria-labelledby="confirmTitle">
+  <div class="dlg-head">
+    <div class="confirm-icon"><svg><use href="#i-trash"/></svg></div>
+    <div><h2 id="confirmTitle"></h2><p id="confirmText"></p></div>
+  </div>
+  <div class="dlg-foot">
+    <button class="btn" id="confirmCancel">Cancel</button>
+    <button class="btn btn-danger" id="confirmOk">Delete</button>
+  </div>
+</dialog>
+
+<div class="toast" id="toast" role="status" hidden><svg><use href="#i-check"/></svg><span></span></div>
+
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const TOKEN_KEY = "clipferry.token", THEME_KEY = "clipferry.theme";
+  const store = {
+    get(k) { try { return sessionStorage.getItem(k) || localStorage.getItem(k) || ""; } catch { return ""; } },
+    set(k, v) { try { sessionStorage.setItem(k, v); } catch {} },
+    getLocal(k) { try { return localStorage.getItem(k) || ""; } catch { return ""; } },
+    setLocal(k, v) { try { localStorage.setItem(k, v); } catch {} },
+  };
+
+  // The app opens this page with the token in the URL fragment, which never
+  // reaches the server logs; move it to session storage and clean the URL.
+  const hash = new URLSearchParams(location.hash.slice(1));
+  if (hash.get("token")) {
+    store.set(TOKEN_KEY, hash.get("token"));
+    history.replaceState(null, "", location.pathname + location.search);
+  }
+  const token = store.get(TOKEN_KEY);
+
+  let state = null;
+  let clips = [];
+  let filter = { kind: "all", device: "" };
+  let query = "";
+  let searchTimer, loadSeq = 0;
+  const expanded = new Set(), revealed = new Set();
+
+  /* ---------- theme ---------- */
+  function applyTheme(t) {
+    if (t === "light" || t === "dark") document.documentElement.dataset.theme = t;
+    else delete document.documentElement.dataset.theme;
+  }
+  applyTheme(store.getLocal(THEME_KEY));
+
+  /* ---------- helpers ---------- */
+  async function api(path, opts = {}) {
+    const headers = { Authorization: `Bearer ${token}`, ...(opts.headers || {}) };
+    if (opts.body) headers["Content-Type"] = "application/json";
+    const res = await fetch(`/api${path}`, { ...opts, headers });
+    if (res.status === 401) { const e = new Error("unauthorized"); e.status = 401; throw e; }
+    const body = res.status === 204 ? null : await res.json().catch(() => null);
+    if (!res.ok) { const e = new Error((body && body.error) || `Request failed (${res.status})`); e.status = res.status; throw e; }
+    return body;
+  }
+
+  function el(tag, props = {}, ...children) {
+    const n = document.createElement(tag);
+    for (const [k, v] of Object.entries(props)) {
+      if (k === "class") n.className = v;
+      else if (k === "ariaLabel") n.setAttribute("aria-label", v);
+      else if (k.startsWith("aria") || k === "title" || k === "role" || k.startsWith("data")) n.setAttribute(k.replace(/[A-Z]/g, (m) => "-" + m.toLowerCase()), v);
+      else n[k] = v;
+    }
+    for (const c of children) if (c != null && c !== false) n.append(c);
+    return n;
+  }
+  const icon = (id) => {
+    const s = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    const u = document.createElementNS("http://www.w3.org/2000/svg", "use");
+    u.setAttribute("href", `#${id}`); s.append(u); return s;
+  };
+
+  function toast(msg, kind) {
+    const t = $("toast");
+    t.querySelector("span").textContent = msg;
+    t.classList.toggle("warn", kind === "warn");
+    t.querySelector("use").setAttribute("href", kind === "warn" ? "#i-shield" : "#i-check");
+    t.hidden = false;
+    clearTimeout(toast.timer);
+    toast.timer = setTimeout(() => (t.hidden = true), kind === "warn" ? 3600 : 2200);
+  }
+
+  // Devices get distinct colours by their position in the device list.
+  const DEVICE_COLORS = ["#2f6fec", "#14a89a", "#9b5de5", "#e07a2f", "#d94f87", "#4a9e3f"];
+  function devColor(id) {
+    const i = state ? state.devices.findIndex((d) => d.id === id) : -1;
+    if (i >= 0) return DEVICE_COLORS[i % DEVICE_COLORS.length];
+    let h = 0; for (const c of id || "x") h = (h * 31 + c.charCodeAt(0)) >>> 0;
+    return DEVICE_COLORS[h % DEVICE_COLORS.length];
+  }
+  const platformIcon = (p) => (p === "macos" ? "i-laptop" : "i-monitor");
+  const platformName = (p) => ({ macos: "macOS", windows: "Windows", linux: "Linux" })[p] || p || "";
+
+  function relTime(iso) {
+    const s = (Date.now() - new Date(iso).getTime()) / 1000;
+    if (s < 30) return "just now";
+    if (s < 3600) return `${Math.max(1, Math.round(s / 60))}m ago`;
+    if (s < 86400) return `${Math.round(s / 3600)}h ago`;
+    const d = new Date(iso);
+    const days = Math.floor(s / 86400);
+    if (days < 7) return d.toLocaleDateString(undefined, { weekday: "short" }) + " " + d.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });
+    return d.toLocaleDateString(undefined, { day: "numeric", month: "short", year: d.getFullYear() === new Date().getFullYear() ? undefined : "numeric" });
+  }
+  function untilText(iso) {
+    const s = Math.max(0, Math.round((new Date(iso).getTime() - Date.now()) / 1000));
+    if (s >= 3600) return `${Math.round(s / 3600)}h`;
+    return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
+  }
+  const secretLabel = (k) => ({
+    "private-key": "Private key", "aws-access-key": "AWS key", "github-token": "GitHub token", "gitlab-token": "GitLab token",
+    "ai-api-key": "API key", "openai-key": "API key", "stripe-key": "Stripe key", "slack-token": "Slack token",
+    "google-api-key": "Google API key", "npm-token": "npm token", jwt: "Token", "connection-string": "Connection string",
+    assignment: "Password", "password-manager": "Password", "one-time-code": "One-time code", "card-number": "Card number", password: "Password",
+  })[k] || "Secret";
+
+  function looksLikeCode(s) {
+    return /[{};=<>$]|^\s*(\$|#!|import |const |let |def |func |SELECT |sudo |npm |git |docker |cd )/m.test(s) || /\n\s{2,}\S/.test(s) || /^[\w./~-]+$/.test(s.trim());
+  }
+
+  function highlight(text, q) {
+    const frag = document.createDocumentFragment();
+    const words = q.trim().split(/\s+/).filter(Boolean).map((w) => w.toLowerCase());
+    if (!words.length) { frag.append(text); return frag; }
+    const lower = text.toLowerCase();
+    let i = 0;
+    while (i < text.length) {
+      let best = -1, len = 0;
+      for (const w of words) { const j = lower.indexOf(w, i); if (j !== -1 && (best === -1 || j < best)) { best = j; len = w.length; } }
+      if (best === -1) { frag.append(text.slice(i)); break; }
+      frag.append(text.slice(i, best), el("mark", {}, text.slice(best, best + len)));
+      i = best + len;
+    }
+    return frag;
+  }
+
+  /* ---------- views ---------- */
+  function showLocked() { $("lockedView").hidden = false; $("appView").hidden = true; }
+
+  function renderHeader() {
+    const pill = $("statusPill");
+    pill.hidden = false;
+    $("settingsBtn").hidden = false;
+    $("mcpBtn").hidden = false;
+    const st = state.status, set = state.settings;
+    const peers = state.devices.filter((d) => !d.self);
+    const online = onlinePeers();
+    let s = "offline", t = "";
+    if (!st.paired) { s = "none"; t = "Not paired"; }
+    else if (set.paused) { s = "paused"; t = "Paused"; }
+    else if (st.connected && online.length) { s = "online"; t = online.length === 1 ? `Synced with ${online[0].name}` : `Synced with ${online.length} devices`; }
+    else if (st.mode === "lan") { t = peers.length === 1 ? `Looking for ${peers[0].name}…` : "Looking for your devices…"; }
+    else { t = st.connected ? (peers.length === 1 ? `Waiting for ${peers[0].name}…` : "Waiting for your devices…") : "Reconnecting…"; }
+    pill.dataset.state = s;
+    $("statusText").textContent = t;
+    pill.title = st.error || "Devices";
+    $("onboard").hidden = st.paired && peers.length > 0;
+    const auto = state.autostart;
+    $("onboardLogin").hidden = auto === null || auto === undefined;
+    $("autostartSetting").hidden = auto === null || auto === undefined;
+    $("onboardAutostart").checked = !!auto;
+    $("sAutostart").checked = !!auto;
+  }
+
+  // Devices send a hello every minute; one heard from recently is online.
+  function onlinePeers() { return state.devices.filter((d) => !d.self && Date.now() - new Date(d.last_seen) < 150000); }
+
+  function renderChips() {
+    const wrap = $("chips");
+    wrap.replaceChildren();
+    const chip = (label, active, onclick, lead) => el("button", { class: "chip", ariaPressed: String(active), onclick }, lead, label);
+    wrap.append(chip("All", filter.kind === "all", () => setFilter("all")));
+    wrap.append(chip("Pinned", filter.kind === "pinned", () => setFilter("pinned"), icon("i-pin")));
+    if (state.devices.length > 1) {
+      for (const d of state.devices) {
+        wrap.append(chip(d.self ? `${d.name} (this)` : d.name, filter.kind === "device" && filter.device === d.id,
+          () => setFilter("device", d.id), el("span", { class: "dot", style: `background:${devColor(d.id)}` })));
+      }
+    }
+  }
+  function setFilter(kind, device = "") { filter = { kind, device }; renderChips(); loadClips(); }
+
+  function clipNode(c) {
+    const masked = c.sensitive && !revealed.has(c.id);
+    const content = masked ? "•".repeat(Math.min(24, Math.max(8, c.content.length))) : c.content;
+    const isShort = !masked && content.split("\n").length <= 4 && content.length < 360;
+    const pre = el("pre", {
+      class: "content" + (masked ? " masked" : "") + (!masked && !looksLikeCode(c.content) ? " prose" : "") + (isShort ? " short" : ""),
+      title: masked ? "" : "Click to copy",
+    });
+    if (masked) pre.textContent = content; else pre.append(highlight(content, query));
+    if (!masked) pre.onclick = () => { if (!getSelection().toString()) copyClip(c, copyBtn); };
+
+    const copyBtn = el("button", { class: "icon-btn copy-main", title: "Copy", ariaLabel: "Copy" }, icon("i-copy"));
+    copyBtn.onclick = () => copyClip(c, copyBtn);
+    const pinBtn = el("button", { class: "icon-btn hover-only pin-act", title: c.pinned ? "Unpin" : "Pin", ariaLabel: c.pinned ? "Unpin" : "Pin", ariaPressed: String(c.pinned) },
+      icon(c.pinned ? "i-pin-fill" : "i-pin"));
+    pinBtn.onclick = () => togglePin(c);
+    const delBtn = el("button", { class: "icon-btn danger hover-only", title: "Delete everywhere", ariaLabel: "Delete" }, icon("i-trash"));
+    delBtn.onclick = () => deleteClip(c, li);
+
+    const meta = el("div", { class: "meta" },
+      el("span", { class: "meta-item" }, el("span", { class: "dev-dot", style: `background:${devColor(c.device_id)}` }),
+        c.device_id === state.self.id ? `${c.device_name} (this)` : c.device_name),
+      el("span", { class: "meta-item", title: new Date(c.created_at).toLocaleString() }, icon("i-clock"), relTime(c.created_at)),
+    );
+    if (c.sensitive) {
+      const b = el("span", { class: "badge" }, icon("i-lock"), secretLabel(c.secret_kind));
+      if (c.expires_at) {
+        const ttl = el("span", { class: "ttl" }, " · " + untilText(c.expires_at));
+        ttl.dataset.expires = c.expires_at;
+        b.append(ttl);
+      }
+      meta.append(b);
+      const rv = el("button", { class: "reveal" }, masked ? "Show" : "Hide");
+      rv.onclick = () => { masked ? revealed.add(c.id) : revealed.delete(c.id); renderClips(); };
+      meta.append(rv);
+    }
+    if (c.pinned) meta.append(el("span", { class: "badge pin" }, icon("i-pin-fill"), "Pinned"));
+    if (!masked && !isShort) {
+      const more = el("button", { class: "more" }, expanded.has(c.id) ? "Show less" : "Show more");
+      more.onclick = () => { expanded.has(c.id) ? expanded.delete(c.id) : expanded.add(c.id); renderClips(); };
+      meta.append(more);
+    }
+    const li = el("li", { class: "clip" + (c.sensitive ? " sensitive" : "") + (expanded.has(c.id) ? " expanded" : "") },
+      pre, el("div", { class: "actions" }, pinBtn, delBtn, copyBtn), meta);
+    li.dataset.id = c.id;
+    return li;
+  }
+
+  function renderClips(flashId) {
+    const area = $("clipArea");
+    const info = $("resultInfo");
+    area.replaceChildren();
+    $("footerBar").hidden = !clips.length || !!query || filter.kind !== "all";
+    $("footerCount").textContent = `${state.count} clip${state.count === 1 ? "" : "s"} in history`;
+    if (query) {
+      info.hidden = false;
+      info.textContent = clips.length ? `${clips.length} match${clips.length === 1 ? "" : "es"} for “${query}”` : "";
+    } else info.hidden = true;
+
+    if (!clips.length) {
+      const [title, text] = query ? ["No matches", `Nothing you copied contains “${query}”.`]
+        : filter.kind === "pinned" ? ["Nothing pinned", "Pin clips you reach for often — they stay at the top and are never trimmed."]
+        : ["Copy something", state.status.paired ? "Anything you copy on this or a paired computer appears here." : "Anything you copy appears here. Pair another computer to share it."];
+      area.append(el("div", { class: "empty" }, icon("i-empty"), el("h2", {}, title), el("p", {}, text)));
+      return;
+    }
+    const groups = [];
+    if (filter.kind === "all" && !query) {
+      const pinned = clips.filter((c) => c.pinned), rest = clips.filter((c) => !c.pinned);
+      if (pinned.length) groups.push(["Pinned", pinned]);
+      const today = new Date().toDateString();
+      const yesterday = new Date(Date.now() - 86400000).toDateString();
+      const by = new Map();
+      for (const c of rest) {
+        const d = new Date(c.created_at).toDateString();
+        const label = d === today ? "Today" : d === yesterday ? "Yesterday" : new Date(c.created_at).toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long" });
+        if (!by.has(label)) by.set(label, []);
+        by.get(label).push(c);
+      }
+      for (const g of by) groups.push(g);
+    } else groups.push([null, clips]);
+
+    for (const [label, list] of groups) {
+      if (label) area.append(el("div", { class: "group-label" }, label));
+      const ul = el("ul", { class: "clips" });
+      for (const c of list) {
+        const n = clipNode(c);
+        if (c.id === flashId) n.classList.add("flash");
+        ul.append(n);
+      }
+      area.append(ul);
+    }
+  }
+
+  async function loadClips(flashId) {
+    const seq = ++loadSeq;
+    const p = new URLSearchParams({ limit: "200" });
+    if (query) p.set("q", query);
+    if (filter.kind === "pinned") p.set("pinned", "1");
+    if (filter.kind === "device") p.set("device", filter.device);
+    if (!clips.length && !query) $("clipArea").replaceChildren(...[0, 1, 2].map(() => el("div", { class: "skeleton", style: "margin-bottom:8px" })));
+    try {
+      const rows = await api(`/clips?${p}`);
+      if (seq !== loadSeq) return;
+      // Pinned first when browsing everything.
+      clips = filter.kind === "all" && !query ? [...rows.filter((c) => c.pinned), ...rows.filter((c) => !c.pinned)] : rows;
+      renderClips(flashId);
+    } catch (e) { handleError(e); }
+  }
+
+  async function loadState() {
+    state = await api("/state");
+    renderHeader();
+    renderChips();
+  }
+
+  function handleError(e) {
+    if (e.status === 401) { showLocked(); return; }
+    toast(e.message, "warn");
+  }
+
+  /* ---------- actions ---------- */
+  async function copyClip(c, btn) {
+    try {
+      await api(`/clips/${encodeURIComponent(c.id)}/copy`, { method: "POST" });
+      btn.classList.add("done");
+      btn.replaceChildren(icon("i-check"));
+      setTimeout(() => { btn.classList.remove("done"); btn.replaceChildren(icon("i-copy")); }, 1200);
+      toast(c.sensitive ? "Copied — it will be cleared when it expires" : "Copied to clipboard");
+    } catch (e) { handleError(e); }
+  }
+  async function togglePin(c) {
+    try { await api(`/clips/${encodeURIComponent(c.id)}/pin`, { method: "POST", body: JSON.stringify({ pinned: !c.pinned }) }); }
+    catch (e) { handleError(e); }
+  }
+  function deleteClip(c, li) {
+    li.classList.add("removing");
+    setTimeout(async () => {
+      try { await api(`/clips/${encodeURIComponent(c.id)}`, { method: "DELETE" }); toast("Deleted on all devices"); }
+      catch (e) { li.classList.remove("removing"); handleError(e); }
+    }, 160);
+  }
+
+  function confirmAction(title, text, okLabel) {
+    return new Promise((resolve) => {
+      const d = $("confirmDialog");
+      $("confirmTitle").textContent = title;
+      $("confirmText").textContent = text;
+      $("confirmOk").textContent = okLabel;
+      const done = (v) => { d.close(); resolve(v); };
+      $("confirmOk").onclick = () => done(true);
+      $("confirmCancel").onclick = () => done(false);
+      d.onclose = () => resolve(false);
+      d.showModal();
+    });
+  }
+
+  $("clearBtn").onclick = async () => {
+    if (!(await confirmAction("Clear history?", "Unpinned clips are deleted on all paired devices. Pinned clips stay.", "Clear"))) return;
+    try { const r = await api("/clips", { method: "DELETE" }); toast(`Cleared ${r.deleted} clip${r.deleted === 1 ? "" : "s"}`); }
+    catch (e) { handleError(e); }
+  };
+
+  /* ---------- pairing ---------- */
+  let countdownTimer;
+  function pairView(view) {
+    for (const id of ["pairChoose", "pairShow", "pairEnter", "pairDone"]) $(id).hidden = id !== view;
+    $("pairSubmit").hidden = view !== "pairEnter";
+    $("pairCancel").textContent = view === "pairDone" ? "Done" : "Cancel";
+    $("pairError").hidden = true;
+  }
+  function pairError(msg) { const e = $("pairError"); e.querySelector("span").textContent = msg; e.hidden = false; }
+  function openPair(mode) {
+    pairView("pairChoose");
+    $("pairDialog").showModal();
+    if (mode === "show") startShow();
+    if (mode === "enter") startEnter();
+  }
+  async function startShow() {
+    pairView("pairShow");
+    try {
+      const ps = await api("/pair/start", { method: "POST" });
+      showCode(ps);
+    } catch (e) { pairError(e.message); }
+  }
+  function showCode(ps) {
+    $("pairCode").replaceChildren(...ps.code.split("-").map((g) => el("span", {}, g)));
+    clearInterval(countdownTimer);
+    const tick = () => {
+      const s = Math.round((new Date(ps.expires_at) - Date.now()) / 1000);
+      $("pairCountdown").textContent = s > 0 ? `Expires in ${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}` : "Expired";
+    };
+    tick();
+    countdownTimer = setInterval(tick, 1000);
+  }
+  function startEnter() {
+    pairView("pairEnter");
+    $("codeInput").value = "";
+    $("joinWaiting").hidden = true;
+    setTimeout(() => $("codeInput").focus(), 50);
+  }
+  $("codeInput").addEventListener("input", (e) => {
+    const d = e.target.value.replace(/\D/g, "").slice(0, 9);
+    e.target.value = d.replace(/^(\d{3})(\d{0,3})?(\d{0,3})?$/, (_, a, b, c) => [a, b, c].filter(Boolean).join("-")) || d;
+    $("pairSubmit").disabled = d.length !== 9;
+    if (d.length === 9) $("pairError").hidden = true;
+  });
+  $("pairEnter").onsubmit = (e) => { e.preventDefault(); $("pairSubmit").click(); };
+  $("pairSubmit").onclick = async () => {
+    const code = $("codeInput").value;
+    if (code.replace(/\D/g, "").length !== 9) return;
+    $("pairError").hidden = true;
+    $("joinWaiting").hidden = false;
+    $("pairSubmit").disabled = true;
+    try { await api("/pair/join", { method: "POST", body: JSON.stringify({ code }) }); }
+    catch (e) { $("joinWaiting").hidden = true; $("pairSubmit").disabled = false; pairError(e.message); }
+  };
+  $("choiceShow").onclick = startShow;
+  $("choiceEnter").onclick = startEnter;
+  $("onboardShow").onclick = () => openPair("show");
+  $("onboardEnter").onclick = () => openPair("enter");
+  $("pairDialog").addEventListener("close", () => {
+    clearInterval(countdownTimer);
+    if (!$("pairShow").hidden || !$("joinWaiting").hidden) api("/pair/cancel", { method: "POST" }).catch(() => {});
+  });
+
+  /* ---------- start at login ---------- */
+  async function setAutostart(on, input) {
+    try {
+      await api("/autostart", { method: "PUT", body: JSON.stringify({ enabled: on }) });
+      state.autostart = on;
+      $("onboardAutostart").checked = on;
+      $("sAutostart").checked = on;
+      toast(on ? "Clipferry will start with this computer" : "Clipferry won't start on its own");
+    } catch (e) { input.checked = !on; handleError(e); }
+  }
+  $("onboardAutostart").onchange = (e) => setAutostart(e.target.checked, e.target);
+  $("sAutostart").onchange = (e) => setAutostart(e.target.checked, e.target);
+
+  /* ---------- devices ---------- */
+  function renderDevices() {
+    const list = $("deviceList");
+    list.replaceChildren();
+    for (const d of state.devices) {
+      const online = d.self || Date.now() - new Date(d.last_seen) < 5 * 60 * 1000;
+      list.append(el("li", { class: "device" },
+        el("span", { class: "ico", style: `background:${devColor(d.id)}` }, icon(platformIcon(d.platform))),
+        el("div", { style: "min-width:0" }, el("div", { class: "name" }, d.name),
+          el("div", { class: "sub" }, `${platformName(d.platform)} · ${d.self ? "this device" : online ? "active " + relTime(d.last_seen) : "last seen " + relTime(d.last_seen)}`)),
+        d.self ? el("span", { class: "you" }, "You") : null));
+    }
+    const peers = state.devices.length - 1;
+    $("devicesSub").textContent = state.status.paired ? `${peers ? peers + 1 + " devices share" : "Only this device is in"} this clipboard.` : "This device is not paired yet.";
+    $("leaveBtn").hidden = !state.status.paired;
+    const st = state.status, relay = state.settings.relay_url.replace(/^wss?:\/\//, "");
+    const err = st.error ? ` (${st.error})` : "";
+    $("relayNote").textContent = !st.paired ? "Pair another computer on this Wi-Fi to start sharing your clipboard."
+      : st.mode === "lan"
+        ? (onlinePeers().length ? "Connected directly over your local network — no server involved. Clips are end-to-end encrypted."
+          : `Looking for your other devices on this network. They need to be on the same Wi-Fi with Clipferry running${err}.`)
+        : (st.connected ? `Connected through ${relay}. Clips are end-to-end encrypted; the relay cannot read them.`
+          : `Cannot reach ${relay} right now${err}. Clips will sync once it is back.`);
+  }
+  $("statusPill").onclick = () => { renderDevices(); $("devicesDialog").showModal(); };
+  $("addDeviceBtn").onclick = () => { $("devicesDialog").close(); openPair(); };
+  $("leaveBtn").onclick = async () => {
+    if (!(await confirmAction("Leave this ferry?", "This device stops syncing. Its history stays here; other devices keep theirs.", "Leave"))) return;
+    try { await api("/leave", { method: "POST" }); $("devicesDialog").close(); toast("Left the ferry"); await loadState(); } catch (e) { handleError(e); }
+  };
+
+  /* ---------- settings ---------- */
+  function openSettings() {
+    const s = state.settings;
+    $("versionText").textContent = `Clipferry ${state.version}`;
+    $("sName").value = s.device_name;
+    for (const r of document.querySelectorAll("input[name=secretMode]")) r.checked = r.value === s.secret_mode;
+    const ttl = $("sTTL");
+    if (![...ttl.options].some((o) => +o.value === s.secret_ttl_seconds)) ttl.append(el("option", { value: s.secret_ttl_seconds }, `${s.secret_ttl_seconds} seconds`));
+    ttl.value = String(s.secret_ttl_seconds);
+    $("sApply").checked = s.apply_remote;
+    $("sPaused").checked = s.paused;
+    $("sMcpSecrets").checked = s.mcp_show_secrets;
+    const lim = $("sLimit");
+    if (![...lim.options].some((o) => +o.value === s.history_limit)) lim.append(el("option", { value: s.history_limit }, `${s.history_limit} clips`));
+    lim.value = String(s.history_limit);
+    for (const r of document.querySelectorAll("input[name=conn]")) r.checked = r.value === (s.relay_url ? "relay" : "lan");
+    $("sRelay").value = s.relay_url;
+    $("sRelayToken").value = s.relay_token || "";
+    $("sTheme").value = store.getLocal(THEME_KEY) || "system";
+    $("settingsError").hidden = true;
+    syncTTL();
+    syncConn();
+    $("settingsDialog").showModal();
+  }
+  function syncTTL() { $("ttlRow").hidden = document.querySelector("input[name=secretMode]:checked")?.value !== "expire"; }
+  for (const r of document.querySelectorAll("input[name=secretMode]")) r.onchange = syncTTL;
+  const connMode = () => document.querySelector("input[name=conn]:checked")?.value || "lan";
+  function syncConn() { $("relayFields").hidden = connMode() !== "relay"; }
+  for (const r of document.querySelectorAll("input[name=conn]")) r.onchange = () => { syncConn(); if (connMode() === "relay") $("sRelay").focus(); };
+  $("sTheme").onchange = (e) => { store.setLocal(THEME_KEY, e.target.value); applyTheme(e.target.value); };
+  $("settingsForm").onsubmit = (e) => { e.preventDefault(); $("settingsSave").click(); };
+  $("settingsSave").onclick = async () => {
+    const body = {
+      ...state.settings,
+      device_name: $("sName").value.trim(),
+      secret_mode: document.querySelector("input[name=secretMode]:checked").value,
+      secret_ttl_seconds: +$("sTTL").value,
+      apply_remote: $("sApply").checked,
+      paused: $("sPaused").checked,
+      mcp_show_secrets: $("sMcpSecrets").checked,
+      history_limit: +$("sLimit").value,
+      relay_url: connMode() === "relay" ? $("sRelay").value.trim() : "",
+      relay_token: $("sRelayToken").value,
+    };
+    if (connMode() === "relay" && !body.relay_url) {
+      const err = $("settingsError"); err.querySelector("span").textContent = "Enter the relay URL, or choose Same Wi-Fi."; err.hidden = false;
+      return;
+    }
+    try {
+      await api("/settings", { method: "PUT", body: JSON.stringify(body) });
+      $("settingsDialog").close();
+      toast("Settings saved");
+      await loadState();
+      loadClips();
+    } catch (e) {
+      if (e.status === 401) return handleError(e);
+      const err = $("settingsError"); err.querySelector("span").textContent = e.message; err.hidden = false;
+    }
+  };
+  $("settingsBtn").onclick = openSettings;
+
+  /* ---------- MCP ---------- */
+  let mcpTab = "cursor";
+  function renderSnippet() {
+    const url = state.mcp_url;
+    const header = `Bearer ${token}`;
+    const snippets = {
+      cursor: ["Add to ~/.cursor/mcp.json:", JSON.stringify({ mcpServers: { clipferry: { url, headers: { Authorization: header } } } }, null, 2)],
+      vscode: ["Add to .vscode/mcp.json (or your user settings):", JSON.stringify({ servers: { clipferry: { type: "http", url, headers: { Authorization: header } } } }, null, 2)],
+      other: ["Any MCP client with Streamable HTTP support — server URL and header:", `URL:    ${url}\nHeader: Authorization: ${header}`],
+    };
+    const [label, code] = snippets[mcpTab];
+    $("snippetLabel").textContent = label;
+    $("snippet").textContent = code;
+    for (const b of document.querySelectorAll("#mcpDialog [role=tab]")) b.setAttribute("aria-selected", String(b.dataset.tab === mcpTab));
+  }
+  for (const b of document.querySelectorAll("#mcpDialog [role=tab]")) b.onclick = () => { mcpTab = b.dataset.tab; renderSnippet(); };
+  $("copySnippet").onclick = async () => {
+    try { await navigator.clipboard.writeText($("snippet").textContent); toast("Copied"); }
+    catch { const r = document.createRange(); r.selectNodeContents($("snippet")); getSelection().removeAllRanges(); getSelection().addRange(r); toast("Selected — press ⌘C / Ctrl+C"); }
+  };
+  $("mcpBtn").onclick = () => { renderSnippet(); $("mcpDialog").showModal(); };
+
+  for (const b of document.querySelectorAll("[data-close]")) b.addEventListener("click", () => b.closest("dialog").close());
+
+  /* ---------- search & keys ---------- */
+  $("searchInput").addEventListener("input", (e) => {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => { query = e.target.value.trim(); loadClips(); }, 140);
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "/" && !/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName) && !document.querySelector("dialog[open]")) {
+      e.preventDefault(); $("searchInput").focus();
+    }
+    if (e.key === "Escape" && document.activeElement === $("searchInput") && $("searchInput").value) {
+      $("searchInput").value = ""; query = ""; loadClips();
+    }
+  });
+
+  /* ---------- live updates ---------- */
+  let refreshTimer;
+  const refreshSoon = (flashId) => { clearTimeout(refreshTimer); refreshTimer = setTimeout(async () => { await loadState().catch(() => {}); loadClips(flashId); }, 60); };
+  function connectEvents() {
+    const es = new EventSource(`/api/events?token=${encodeURIComponent(token)}`);
+    es.onmessage = (m) => {
+      const ev = JSON.parse(m.data);
+      switch (ev.type) {
+        case "clip.added": refreshSoon(ev.data.id); break;
+        case "clip.updated": case "clip.deleted": case "clips.cleared": refreshSoon(); break;
+        case "status": case "devices": case "settings": case "autostart": loadState().catch(() => {}); break;
+        case "secret.skipped": toast(`${ev.data.label} kept on this device only`, "warn"); break;
+        case "pair":
+          if (ev.data.role === "host" && $("pairDialog").open && !$("pairShow").hidden) showCode(ev.data);
+          break;
+        case "pair.done":
+          clearInterval(countdownTimer);
+          if ($("pairDialog").open) { pairView("pairDone"); $("pairDoneTitle").textContent = `Paired with ${ev.data.name}`; }
+          else toast(`Paired with ${ev.data.name}`);
+          loadState().catch(() => {});
+          break;
+        case "pair.failed":
+          clearInterval(countdownTimer);
+          $("joinWaiting").hidden = true; $("pairSubmit").disabled = false;
+          if ($("pairDialog").open) pairError(ev.data.error); else toast(ev.data.error, "warn");
+          break;
+      }
+    };
+    es.onerror = () => {
+      es.close();
+      // Stop retrying once the token is no longer accepted (app restarted with a new one).
+      setTimeout(() => api("/state").then(() => { connectEvents(); refreshSoon(); })
+        .catch((e) => (e.status === 401 ? showLocked() : es.onerror())), 2000);
+    };
+  }
+
+  // Keep relative times and secret countdowns fresh.
+  setInterval(() => {
+    for (const t of document.querySelectorAll("[data-expires]")) t.textContent = " · " + untilText(t.dataset.expires);
+  }, 1000);
+  setInterval(() => {
+    loadState().catch(() => {});
+    if (!document.querySelector("dialog[open]")) renderClips();
+  }, 30000);
+
+  /* ---------- boot ---------- */
+  (async () => {
+    if (!token) return showLocked();
+    try {
+      await loadState();
+      $("appView").hidden = false;
+      await loadClips();
+      connectEvents();
+      if (location.search.includes("pair=1")) openPair();
+    } catch (e) { handleError(e); }
+  })();
+})();
+</script>
+</body>
+</html>
