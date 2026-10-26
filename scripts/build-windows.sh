@@ -26,10 +26,14 @@ for arch in amd64 arm64; do
 done
 cp dist/Clipferry-amd64.exe dist/Clipferry.exe
 
+# makensis is a native Windows program: give it native paths.
+winpath() { if command -v cygpath >/dev/null; then cygpath -w "$1"; else echo "$1"; fi; }
+
 if command -v makensis >/dev/null; then
-  makensis -V2 -DVERSION="$VERSION" -DNUMERIC="$NUMERIC" -DSRC="$(pwd)/dist/Clipferry-amd64.exe" \
-    -DOUT="$(pwd)/dist/Clipferry-$VERSION-windows-setup.exe" -DICON="$(pwd)/build/windows/icon.ico" \
-    build/windows/installer.nsi
+  ls -la dist
+  makensis -V2 -DVERSION="$VERSION" -DNUMERIC="$NUMERIC" -DSRC="$(winpath "$PWD/dist/Clipferry-amd64.exe")" \
+    -DOUT="$(winpath "$PWD/dist/Clipferry-$VERSION-windows-setup.exe")" -DICON="$(winpath "$PWD/build/windows/icon.ico")" \
+    "$(winpath "$PWD/build/windows/installer.nsi")"
   echo "Built dist/Clipferry-$VERSION-windows-setup.exe"
 else
   echo "makensis not found; built the portable dist/Clipferry.exe only"
