@@ -166,7 +166,7 @@ func (e *Engine) updateLoop(ctx context.Context) {
 }
 
 // Supported UI languages.
-var languages = map[string]bool{"en": true, "tr": true}
+var languages = map[string]bool{"en": true, "tr": true, "zh": true}
 
 // Language is the UI language in effect: the user's choice, or the system's
 // when that is supported, or English.
