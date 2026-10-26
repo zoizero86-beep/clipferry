@@ -56,7 +56,7 @@ func main() {
 		e              *core.Engine
 		cb             *memClipboard
 	}
-	devs := []*dev{{name: "MacBook Pro", platform: "macos"}, {name: "Office PC", platform: "windows"}}
+	devs := []*dev{{name: "MacBook Pro", platform: "macos"}, {name: "Windows PC", platform: "windows"}}
 	for i, d := range devs {
 		st, err := store.Open(":memory:")
 		if err != nil {
@@ -96,7 +96,7 @@ func main() {
 		text string
 	}{
 		{0, "docker compose up -d --build"},
-		{1, "Toplantı notları: yeni web sitesi için logo revizyonu cuma gününe kadar bitmeli. Müşteri koyu tema da istiyor, mobilde menü sağdan açılsın."},
+		{1, "Meeting notes: logo revisions for the new website are due Friday. The client also wants a dark theme, and the mobile menu should open from the right."},
 		{0, "https://github.com/bkrdmrcioglu/clipferry"},
 		{1, "SELECT id, email, created_at\nFROM users\nWHERE created_at > now() - interval '7 days'\nORDER BY created_at DESC;"},
 		{0, "ghp_" + "aBcDeFgHiJkLmNoPqRsTuVwXyZ0123456789"},

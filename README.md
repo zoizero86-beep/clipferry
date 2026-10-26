@@ -1,6 +1,32 @@
-# Clipferry
+<p align="center">
+  <img src="docs/icon.png" width="96" height="96" alt="Clipferry icon">
+</p>
 
-**Copy on your Mac, paste on your PC, and let your AI tools read it too. No account, no server, open source.**
+<h1 align="center">Clipferry</h1>
+
+<p align="center">
+  <strong>Copy on your Mac, paste on your PC, and let your AI tools read it too.</strong><br>
+  No account, no server, open source.
+</p>
+
+<p align="center">
+  <a href="https://github.com/bkrdmrcioglu/clipferry/releases/latest"><img src="https://img.shields.io/github/v/release/bkrdmrcioglu/clipferry?label=download&color=2563eb" alt="Latest release"></a>
+  <a href="https://github.com/bkrdmrcioglu/clipferry/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/bkrdmrcioglu/clipferry/ci.yml?branch=main&label=tests" alt="Tests"></a>
+  <img src="https://img.shields.io/badge/macOS%20%C2%B7%20Windows-14b8a6" alt="macOS and Windows">
+  <img src="https://img.shields.io/badge/MCP-ready-7c3aed" alt="MCP ready">
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/bkrdmrcioglu/clipferry?color=64748b" alt="MIT license"></a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/bkrdmrcioglu/clipferry/releases/latest"><b>Download for Mac and Windows</b></a> ·
+  <a href="#install">Install</a> ·
+  <a href="#connect-an-ai-tool-mcp">Connect an AI tool</a> ·
+  <a href="#how-it-works">How it works</a>
+</p>
+
+<p align="center">
+  <img src="docs/demo.gif" width="860" alt="Copying on a Mac and the clip appearing on a Windows PC, with secrets masked and a searchable history">
+</p>
 
 Clipferry is a small app for macOS and Windows that keeps one clipboard across the computers on your desk. Install it on both, pair them with a 9-digit code, and anything you copy on one shows up on the other. The computers find each other on your Wi-Fi and talk directly, end-to-end encrypted. It also:
 
@@ -12,7 +38,7 @@ Clipferry is a small app for macOS and Windows that keeps one clipboard across t
 ## How it works
 
 ```
-        MacBook                        same Wi-Fi                     Office PC
+        MacBook                        same Wi-Fi                     Windows PC
  ┌──────────────────┐        encrypted, direct (no server)     ┌──────────────────┐
  │ Clipferry        │ ◄──────────────────────────────────────► │ Clipferry        │
  │  clipboard       │                                          │  clipboard       │
@@ -27,9 +53,24 @@ Clipferry is a small app for macOS and Windows that keeps one clipboard across t
 
 Pairing uses a password-authenticated key exchange (PAKE) over the 9-digit code, so the code never travels and a wrong guess fails. The ferry key is handed over only after the exchange succeeds. If one computer is asleep, the other catches it up on whatever it missed when it wakes.
 
+## Screenshots
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/screenshot-dark.png">
+  <img src="docs/screenshot.png" width="860" alt="Clipferry on a Mac and a Windows PC, side by side">
+</picture>
+
+<img src="docs/pairing-and-settings.png" width="860" alt="Pairing with a one-time code, and the secret handling settings">
+
 ## Install
 
-Download the latest build from **[Releases](https://github.com/bkrdmrcioglu/clipferry/releases)**.
+**macOS** with [Homebrew](https://brew.sh):
+
+```bash
+brew install --cask bkrdmrcioglu/tap/clipferry
+```
+
+Or download the latest build from **[Releases](https://github.com/bkrdmrcioglu/clipferry/releases/latest)**: the `.dmg` for macOS, `-windows-setup.exe` for Windows.
 
 ### macOS (11 Big Sur or later, Apple silicon and Intel)
 
@@ -164,7 +205,7 @@ go run ./cmd/clipferry-relay  # a relay on :8080
 go run ./cmd/clipferry-demo
 ```
 
-This starts two simulated devices ("MacBook Pro" and "Office PC") on a simulated local network in one process, pairs them, copies some sample clips, and prints a URL for each device's window. Add `CLIPFERRY_UI_DIR=internal/ui/dist` to edit the UI live.
+This starts two simulated devices ("MacBook Pro" and "Windows PC") on a simulated local network in one process, pairs them, copies some sample clips, and prints a URL for each device's window. Add `CLIPFERRY_UI_DIR=internal/ui/dist` to edit the UI live.
 
 ### Project layout
 

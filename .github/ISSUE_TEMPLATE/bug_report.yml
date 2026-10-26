@@ -1,0 +1,45 @@
+name: Bug report
+description: Something does not work as expected
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What did you do, what did you expect, and what happened instead?
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Clipferry version
+      description: Settings shows it under the title, e.g. 0.2.0
+    validations:
+      required: true
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating systems involved
+      multiple: true
+      options:
+        - macOS (Apple silicon)
+        - macOS (Intel)
+        - Windows 11
+        - Windows 10
+    validations:
+      required: true
+  - type: dropdown
+    id: connection
+    attributes:
+      label: Connection
+      options:
+        - Same Wi-Fi (default)
+        - Relay server
+  - type: textarea
+    id: logs
+    attributes:
+      label: Log
+      description: |
+        The last lines of `clipferry.log` help a lot. It is in `~/Library/Application Support/Clipferry` (macOS) or `%APPDATA%\Clipferry` (Windows).
+        Please remove anything private first.
+      render: text
