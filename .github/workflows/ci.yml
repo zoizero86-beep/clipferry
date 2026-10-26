@@ -1,0 +1,82 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - run: go vet ./...
+      - name: Unit and end-to-end tests
+        run: go test -race -count=1 -v ./...
+      - name: Relay Docker image builds
+        run: docker build -t clipferry-relay .
+
+  macos:
+    needs: test
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - run: go vet ./...
+      - run: ./scripts/build-macos.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: clipferry-macos
+          path: dist/*.dmg
+
+  windows:
+    needs: test
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - run: go vet ./...
+      - name: Install NSIS
+        run: command -v makensis || choco install nsis -y --no-progress
+      - run: PATH="$PATH:/c/Program Files (x86)/NSIS" ./scripts/build-windows.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: clipferry-windows
+          path: |
+            dist/*-setup.exe
+            dist/Clipferry-amd64.exe
+            dist/Clipferry-arm64.exe
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [macos, windows]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "${GITHUB_REF_NAME}" dist/* --repo "${GITHUB_REPOSITORY}" --title "Clipferry ${GITHUB_REF_NAME}" --generate-notes

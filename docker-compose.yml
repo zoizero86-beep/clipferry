@@ -1,0 +1,15 @@
+# Self-hosted Clipferry relay. Put it behind HTTPS (Coolify, Caddy, Traefik,
+# nginx…) and enter wss://your-domain in Clipferry → Settings → Relay server.
+name: clipferry
+
+services:
+  relay:
+    build: .
+    restart: unless-stopped
+    environment:
+      PORT: 8080
+      # Optional: make the relay private. Devices then need this token in
+      # Settings → Relay server. Clips are end-to-end encrypted either way.
+      CLIPFERRY_RELAY_TOKEN: ${CLIPFERRY_RELAY_TOKEN:-}
+    ports:
+      - "8080:8080"
