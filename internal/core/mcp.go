@@ -31,8 +31,30 @@ func textResult(s string) *mcp.CallToolResult {
 	return &mcp.CallToolResult{Content: []mcp.Content{&mcp.TextContent{Text: s}}}
 }
 
+// MCPSource is what the MCP tools read: the clipboard history and two
+// facts about this device. The running engine is one; a read-only view of
+// the app's database (see OpenHistory) is another.
+type MCPSource interface {
+	Store() *store.Store
+	SelfID() string
+	ShowSecrets() bool
+}
+
+// SelfID is this device's id.
+func (e *Engine) SelfID() string { return e.Self().ID }
+
+// ShowSecrets reports whether AI tools may read sensitive clips.
+func (e *Engine) ShowSecrets() bool { return e.Settings().MCPShowSecrets }
+
 // mcpHandler exposes the clipboard history to AI tools over Streamable HTTP.
 func (e *Engine) mcpHandler() http.Handler {
+	server := NewMCPServer(e)
+	return mcp.NewStreamableHTTPHandler(func(*http.Request) *mcp.Server { return server }, &mcp.StreamableHTTPOptions{Stateless: true, JSONResponse: true})
+}
+
+// NewMCPServer builds the Clipferry MCP server over src.
+func NewMCPServer(src MCPSource) *mcp.Server {
+	t := mcpTools{src}
 	server := mcp.NewServer(&mcp.Implementation{Name: "clipferry", Version: Version}, &mcp.ServerOptions{
 		Instructions: "Clipferry is the user's shared clipboard across their computers. Use it when the user refers to " +
 			"something they just copied, especially on another machine. Sensitive clips (passwords, keys) are " +
@@ -45,23 +67,23 @@ func (e *Engine) mcpHandler() http.Handler {
 	}, func(ctx context.Context, req *mcp.CallToolRequest, a latestArgs) (*mcp.CallToolResult, any, error) {
 		q := store.Query{Limit: 1}
 		if a.FromOtherDevice {
-			q.ExcludeDev = e.Self().ID
+			q.ExcludeDev = t.src.SelfID()
 		}
 		if a.Device != "" {
-			id, err := e.deviceByName(a.Device)
+			id, err := t.deviceByName(a.Device)
 			if err != nil {
 				return textResult(err.Error()), nil, nil
 			}
 			q.DeviceID = id
 		}
-		clips, err := e.st.ListClips(q)
+		clips, err := t.src.Store().ListClips(q)
 		if err != nil {
 			return nil, nil, err
 		}
 		if len(clips) == 0 {
 			return textResult("The clipboard history is empty."), nil, nil
 		}
-		return textResult(e.formatClip(clips[0], true)), nil, nil
+		return textResult(t.formatClip(clips[0], true)), nil, nil
 	})
 
 	mcp.AddTool(server, &mcp.Tool{
@@ -70,17 +92,17 @@ func (e *Engine) mcpHandler() http.Handler {
 	}, func(ctx context.Context, req *mcp.CallToolRequest, a recentArgs) (*mcp.CallToolResult, any, error) {
 		q := store.Query{Limit: clampLimit(a.Limit)}
 		if a.Device != "" {
-			id, err := e.deviceByName(a.Device)
+			id, err := t.deviceByName(a.Device)
 			if err != nil {
 				return textResult(err.Error()), nil, nil
 			}
 			q.DeviceID = id
 		}
-		clips, err := e.st.ListClips(q)
+		clips, err := t.src.Store().ListClips(q)
 		if err != nil {
 			return nil, nil, err
 		}
-		return textResult(e.formatClips(clips, "The clipboard history is empty.")), nil, nil
+		return textResult(t.formatClips(clips, "The clipboard history is empty.")), nil, nil
 	})
 
 	mcp.AddTool(server, &mcp.Tool{
@@ -90,18 +112,18 @@ func (e *Engine) mcpHandler() http.Handler {
 		if strings.TrimSpace(a.Query) == "" {
 			return textResult("query is required"), nil, nil
 		}
-		clips, err := e.st.ListClips(store.Query{Text: a.Query, Limit: clampLimit(a.Limit)})
+		clips, err := t.src.Store().ListClips(store.Query{Text: a.Query, Limit: clampLimit(a.Limit)})
 		if err != nil {
 			return nil, nil, err
 		}
-		return textResult(e.formatClips(clips, fmt.Sprintf("No clips match %q.", a.Query))), nil, nil
+		return textResult(t.formatClips(clips, fmt.Sprintf("No clips match %q.", a.Query))), nil, nil
 	})
 
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "list_devices",
 		Description: "List the devices that share this clipboard.",
 	}, func(ctx context.Context, req *mcp.CallToolRequest, _ struct{}) (*mcp.CallToolResult, any, error) {
-		ds, err := e.st.Devices()
+		ds, err := t.src.Store().Devices()
 		if err != nil {
 			return nil, nil, err
 		}
@@ -116,8 +138,10 @@ func (e *Engine) mcpHandler() http.Handler {
 		return textResult(strings.TrimSpace(b.String())), nil, nil
 	})
 
-	return mcp.NewStreamableHTTPHandler(func(*http.Request) *mcp.Server { return server }, &mcp.StreamableHTTPOptions{Stateless: true, JSONResponse: true})
+	return server
 }
+
+type mcpTools struct{ src MCPSource }
 
 func clampLimit(n int) int {
 	if n <= 0 {
@@ -126,8 +150,8 @@ func clampLimit(n int) int {
 	return min(n, 50)
 }
 
-func (e *Engine) deviceByName(name string) (string, error) {
-	ds, err := e.st.Devices()
+func (t mcpTools) deviceByName(name string) (string, error) {
+	ds, err := t.src.Store().Devices()
 	if err != nil {
 		return "", err
 	}
@@ -141,9 +165,9 @@ func (e *Engine) deviceByName(name string) (string, error) {
 	return "", fmt.Errorf("no device named %q; known devices: %s", name, strings.Join(names, ", "))
 }
 
-func (e *Engine) formatClip(c store.Clip, full bool) string {
+func (t mcpTools) formatClip(c store.Clip, full bool) string {
 	content := c.Content
-	if c.Sensitive && !e.Settings().MCPShowSecrets {
+	if c.Sensitive && !t.src.ShowSecrets() {
 		content = "[withheld: " + strings.ToLower(secrets.LabelFor(c.SecretKind)) +
 			". The user can paste it directly, or allow AI tools to read secrets in Clipferry settings.]"
 	} else if !full && len(content) > 2000 {
@@ -152,13 +176,13 @@ func (e *Engine) formatClip(c store.Clip, full bool) string {
 	return fmt.Sprintf("From %s (%s) at %s, id %s:\n%s", c.DeviceName, c.Platform, c.CreatedAt.Format(time.RFC3339), c.ID, content)
 }
 
-func (e *Engine) formatClips(clips []store.Clip, empty string) string {
+func (t mcpTools) formatClips(clips []store.Clip, empty string) string {
 	if len(clips) == 0 {
 		return empty
 	}
 	parts := make([]string, len(clips))
 	for i, c := range clips {
-		parts[i] = e.formatClip(c, false)
+		parts[i] = t.formatClip(c, false)
 	}
 	return strings.Join(parts, "\n\n---\n\n")
 }

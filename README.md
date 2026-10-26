@@ -170,6 +170,16 @@ Each Clipferry app serves an MCP endpoint on this computer at `http://127.0.0.1:
 
 Any other MCP client that supports Streamable HTTP takes the same URL and `Authorization` header.
 
+**Clients that only start local processes (stdio):** use `clipferry-mcp`, a small standalone server that reads the history the app keeps on the same computer. It does not need the app to be open. Download it for your platform from [Releases](https://github.com/bkrdmrcioglu/clipferry/releases/latest), or run `go install github.com/bkrdmrcioglu/clipferry/cmd/clipferry-mcp@latest`, then configure:
+
+```json
+{
+  "mcpServers": {
+    "clipferry": { "command": "clipferry-mcp" }
+  }
+}
+```
+
 Then ask your assistant something like *"Use the error I just copied on my Windows machine"* or *"Find the SQL query I copied yesterday"*.
 
 ## Different networks? Run a relay (optional)
@@ -213,6 +223,7 @@ This starts two simulated devices ("MacBook Pro" and "Windows PC") on a simulate
 |---|---|
 | `cmd/clipferry` | Desktop app (Wails v3): tray/menu bar icon, window, start at login |
 | `cmd/clipferry-relay` | The optional relay server, for devices on different networks |
+| `cmd/clipferry-mcp` | Standalone MCP server over stdio, reading the app's history |
 | `cmd/clipferry-demo` | Two simulated devices for development |
 | `internal/core` | Engine: clipboard watching, secret policy, sync, local API, MCP |
 | `internal/ferry` | Connections and code pairing (PAKE) |

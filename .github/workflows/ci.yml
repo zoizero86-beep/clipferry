@@ -22,6 +22,21 @@ jobs:
         run: go test -race -count=1 -v ./...
       - name: Relay Docker image builds
         run: docker build -t clipferry-relay .
+      - name: MCP server Docker image builds
+        run: docker build -f mcp.Dockerfile -t clipferry-mcp .
+      - name: Standalone MCP server binaries
+        run: |
+          mkdir -p dist
+          for t in darwin/arm64 darwin/amd64 linux/amd64 linux/arm64 windows/amd64; do
+            os=${t%/*}; arch=${t#*/}; ext=""; [ "$os" = windows ] && ext=".exe"
+            CGO_ENABLED=0 GOOS=$os GOARCH=$arch go build -trimpath \
+              -ldflags "-s -w -X github.com/bkrdmrcioglu/clipferry/internal/core.Version=${GITHUB_REF_NAME#v}" \
+              -o "dist/clipferry-mcp-$os-$arch$ext" ./cmd/clipferry-mcp
+          done
+      - uses: actions/upload-artifact@v4
+        with:
+          name: clipferry-mcp
+          path: dist/clipferry-mcp-*
 
   macos:
     needs: test
@@ -67,7 +82,7 @@ jobs:
 
   release:
     if: startsWith(github.ref, 'refs/tags/v')
-    needs: [macos, windows]
+    needs: [test, macos, windows]
     runs-on: ubuntu-latest
     permissions:
       contents: write

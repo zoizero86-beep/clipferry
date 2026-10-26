@@ -63,22 +63,11 @@ func instanceID() string {
 	return id
 }
 
-func dataDir() string {
-	if d := os.Getenv("CLIPFERRY_DATA_DIR"); d != "" {
-		return d
-	}
-	base, err := os.UserConfigDir()
-	if err != nil {
-		base = os.TempDir()
-	}
-	return filepath.Join(base, "Clipferry")
-}
-
 func main() {
 	autostart := flag.String("autostart", "", `"on" or "off": register or remove start at login, then exit`)
 	flag.Parse()
 
-	dir := dataDir()
+	dir := core.DataDir()
 	if err := os.MkdirAll(dir, 0o700); err != nil {
 		log.Fatal(err)
 	}
